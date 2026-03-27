@@ -1,60 +1,40 @@
 // ============================================
-// DOM Elements
-// ============================================
-const postListEl = document.getElementById('postList');
-const recentListEl = document.getElementById('recentList');
-const archiveListEl = document.getElementById('archiveList');
-const categoryListEl = document.querySelector('.category-list');
-const tagsListEl = document.querySelector('.tags-list');
-const profileStats = document.querySelectorAll('.stat-value');
-const backToTopBtn = document.getElementById('backToTop');
-const themeToggle = document.querySelector('.theme-toggle');
-const searchToggle = document.querySelector('.search-toggle');
-const searchOverlay = document.getElementById('searchOverlay');
-const searchInput = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-const searchClose = document.getElementById('searchClose');
-
-// ============================================
 // Theme Toggle
 // ============================================
-function initTheme() {
-  const saved = localStorage.getItem('blog-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
-  updateThemeIcon(saved);
-}
+(function() {
+  var themeToggle = document.querySelector('.theme-toggle');
 
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('blog-theme', next);
-  updateThemeIcon(next);
-}
+  function initTheme() {
+    var saved = localStorage.getItem('blog-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcon(saved);
+  }
 
-function updateThemeIcon(theme) {
-  if (!themeToggle) return;
-  const icon = themeToggle.querySelector('i');
-  icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
+  function updateThemeIcon(theme) {
+    if (!themeToggle) return;
+    var icon = themeToggle.querySelector('i');
+    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  }
 
-if (themeToggle) {
-  themeToggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    toggleTheme();
-  });
-}
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('blog-theme', next);
+      updateThemeIcon(next);
+    });
+  }
 
-initTheme();
+  initTheme();
+})();
 
 // ============================================
 // Filter State
 // ============================================
 var currentFilter = { type: null, value: null };
 
-// ============================================
-// Filter handler (global function)
-// ============================================
 function filterBy(type, value) {
   if (currentFilter.type === type && currentFilter.value === value) {
     currentFilter = { type: null, value: null };
@@ -73,44 +53,40 @@ function clearFilter() {
 }
 
 // ============================================
-// Compute stats from posts data
+// Compute stats from posts
 // ============================================
 function computeCategories() {
-  var catMap = {};
-  posts.forEach(function(p) {
-    catMap[p.category] = (catMap[p.category] || 0) + 1;
-  });
-  return catMap;
+  var map = {};
+  posts.forEach(function(p) { map[p.category] = (map[p.category] || 0) + 1; });
+  return map;
 }
 
 function computeTags() {
-  var tagMap = {};
+  var map = {};
   posts.forEach(function(p) {
-    p.tags.forEach(function(t) {
-      tagMap[t] = (tagMap[t] || 0) + 1;
-    });
+    p.tags.forEach(function(t) { map[t] = (map[t] || 0) + 1; });
   });
-  return tagMap;
+  return map;
 }
 
 function computeYears() {
-  var yearMap = {};
+  var map = {};
   posts.forEach(function(p) {
-    var year = p.date.split('-')[0];
-    yearMap[year] = (yearMap[year] || 0) + 1;
+    var y = p.date.split('-')[0];
+    map[y] = (map[y] || 0) + 1;
   });
-  return yearMap;
+  return map;
 }
 
 // ============================================
-// Render Categories (dynamic from posts)
+// Render sidebar categories
 // ============================================
 function renderCategories() {
-  if (!categoryListEl) return;
+  var el = document.querySelector('.category-list');
+  if (!el) return;
   var catMap = computeCategories();
   var cats = Object.keys(catMap).sort(function(a, b) { return catMap[b] - catMap[a]; });
-
-  categoryListEl.innerHTML = cats.map(function(cat) {
+  el.innerHTML = cats.map(function(cat) {
     return '<li><a href="javascript:void(0)" onclick="filterBy(\'category\',\'' + cat + '\')">' +
       '<span class="cat-name">' + cat + '</span>' +
       '<span class="cat-count">' + catMap[cat] + '</span></a></li>';
@@ -118,27 +94,27 @@ function renderCategories() {
 }
 
 // ============================================
-// Render Tags (dynamic from posts)
+// Render sidebar tags
 // ============================================
-function renderTags() {
-  if (!tagsListEl) return;
+function renderTagsSidebar() {
+  var el = document.querySelector('.tags-list');
+  if (!el) return;
   var tagMap = computeTags();
   var tags = Object.keys(tagMap).sort(function(a, b) { return tagMap[b] - tagMap[a]; });
-
-  tagsListEl.innerHTML = tags.map(function(tag) {
+  el.innerHTML = tags.map(function(tag) {
     return '<a href="javascript:void(0)" class="tag" onclick="filterBy(\'tag\',\'' + tag + '\')"># ' + tag + '</a>';
   }).join('');
 }
 
 // ============================================
-// Render Archives (dynamic, only years with posts, from 2026 down)
+// Render sidebar archives (only years with posts)
 // ============================================
 function renderArchives() {
-  if (!archiveListEl) return;
+  var el = document.getElementById('archiveList');
+  if (!el) return;
   var yearMap = computeYears();
-  var years = Object.keys(yearMap).sort(function(a, b) { return b - a; });
-
-  archiveListEl.innerHTML = years.map(function(year) {
+  var years = Object.keys(yearMap).sort(function(a, b) { return parseInt(b) - parseInt(a); });
+  el.innerHTML = years.map(function(year) {
     return '<li><a href="javascript:void(0)" onclick="filterBy(\'year\',\'' + year + '\')">' +
       '<span>' + year + '</span>' +
       '<span class="archive-count">' + yearMap[year] + '</span></a></li>';
@@ -146,27 +122,27 @@ function renderArchives() {
 }
 
 // ============================================
-// Render Profile Stats (dynamic)
+// Render profile stats (dynamic)
 // ============================================
 function renderProfileStats() {
-  if (!profileStats || profileStats.length < 4) return;
+  var els = document.querySelectorAll('.stat-value');
+  if (!els || els.length < 4) return;
   var catMap = computeCategories();
   var tagMap = computeTags();
-  var totalWords = 0;
-  posts.forEach(function(p) {
-    totalWords += (p.excerpt || '').length + (p.content || '').length;
-  });
-  profileStats[0].textContent = posts.length;
-  profileStats[1].textContent = Object.keys(catMap).length;
-  profileStats[2].textContent = Object.keys(tagMap).length;
-  profileStats[3].textContent = (totalWords / 10000).toFixed(1);
+  els[0].textContent = posts.length;
+  els[1].textContent = Object.keys(catMap).length;
+  els[2].textContent = Object.keys(tagMap).length;
+  var totalChars = 0;
+  posts.forEach(function(p) { totalChars += (p.excerpt || '').length + (p.content || '').length; });
+  els[3].textContent = (totalChars / 10000).toFixed(1);
 }
 
 // ============================================
-// Render Post List (with filter)
+// Render post list (with filter)
 // ============================================
 function renderPostList() {
-  if (!postListEl) return;
+  var el = document.getElementById('postList');
+  if (!el) return;
 
   var filtered = posts;
   if (currentFilter.type === 'category') {
@@ -178,13 +154,10 @@ function renderPostList() {
   }
 
   var html = '';
-
   if (currentFilter.type) {
-    html += '<div class="filter-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:12px 16px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:0.88rem;">';
-    html += '<span><i class="fas fa-filter" style="margin-right:6px;color:var(--accent)"></i>';
-    html += '筛选：' + currentFilter.value + '（' + filtered.length + ' 篇）</span>';
-    html += '<a href="javascript:void(0)" onclick="clearFilter()" style="color:var(--accent);font-weight:500;">清除筛选</a>';
-    html += '</div>';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:12px 16px;background:var(--accent-light);border-radius:8px;font-size:0.88rem;">';
+    html += '<span><i class="fas fa-filter" style="margin-right:6px;color:var(--accent)"></i>筛选：' + currentFilter.value + '（' + filtered.length + ' 篇）</span>';
+    html += '<a href="javascript:void(0)" onclick="clearFilter()" style="color:var(--accent);font-weight:500;">清除筛选</a></div>';
   }
 
   if (filtered.length === 0) {
@@ -192,8 +165,7 @@ function renderPostList() {
   } else {
     filtered.forEach(function(post) {
       html += '<article class="post-card">';
-      html += '<div class="post-cover"><a href="post.html?id=' + post.id + '">';
-      html += '<img src="' + post.cover + '" alt="' + post.title + '" loading="lazy"></a></div>';
+      html += '<div class="post-cover"><a href="post.html?id=' + post.id + '"><img src="' + post.cover + '" alt="' + post.title + '" loading="lazy"></a></div>';
       html += '<div class="post-body">';
       html += '<h2 class="post-title"><a href="post.html?id=' + post.id + '">' + post.title + '</a></h2>';
       html += '<p class="post-excerpt">' + post.excerpt + '</p>';
@@ -204,47 +176,43 @@ function renderPostList() {
       html += '</div></article>';
     });
   }
-
-  postListEl.innerHTML = html;
+  el.innerHTML = html;
 }
 
 // ============================================
-// Update active states on sidebar
+// Update active states
 // ============================================
 function updateActiveStates() {
   document.querySelectorAll('.category-list a').forEach(function(a) {
     var name = a.querySelector('.cat-name');
-    if (name) {
-      var isActive = currentFilter.type === 'category' && currentFilter.value === name.textContent;
-      a.style.background = isActive ? 'var(--accent-light)' : '';
-      a.style.color = isActive ? 'var(--accent)' : '';
-    }
+    if (!name) return;
+    var active = currentFilter.type === 'category' && currentFilter.value === name.textContent;
+    a.style.background = active ? 'var(--accent-light)' : '';
+    a.style.color = active ? 'var(--accent)' : '';
   });
-
-  document.querySelectorAll('.archive-list a').forEach(function(a) {
+  document.querySelectorAll('#archiveList a').forEach(function(a) {
     var span = a.querySelector('span');
-    if (span) {
-      var isActive = currentFilter.type === 'year' && currentFilter.value === span.textContent;
-      a.style.background = isActive ? 'var(--accent-light)' : '';
-      a.style.color = isActive ? 'var(--accent)' : '';
-    }
+    if (!span) return;
+    var active = currentFilter.type === 'year' && currentFilter.value === span.textContent;
+    a.style.background = active ? 'var(--accent-light)' : '';
+    a.style.color = active ? 'var(--accent)' : '';
   });
-
   document.querySelectorAll('.tags-list .tag').forEach(function(a) {
-    var tagText = a.textContent.replace('# ', '').trim();
-    var isActive = currentFilter.type === 'tag' && currentFilter.value === tagText;
-    a.style.color = isActive ? 'var(--accent)' : '';
-    a.style.fontWeight = isActive ? '700' : '';
+    var t = a.textContent.replace('# ', '').trim();
+    var active = currentFilter.type === 'tag' && currentFilter.value === t;
+    a.style.color = active ? 'var(--accent)' : '';
+    a.style.fontWeight = active ? '700' : '';
   });
 }
 
 // ============================================
-// Render Recent Posts
+// Render recent posts
 // ============================================
 function renderRecent() {
-  if (!recentListEl) return;
+  var el = document.getElementById('recentList');
+  if (!el) return;
   var recent = posts.slice(0, 5);
-  recentListEl.innerHTML = recent.map(function(post) {
+  el.innerHTML = recent.map(function(post) {
     return '<li><span class="recent-date">' + post.date + '</span>' +
       '<a href="post.html?id=' + post.id + '" class="recent-title">' + post.title + '</a></li>';
   }).join('');
@@ -253,133 +221,95 @@ function renderRecent() {
 // ============================================
 // Back to Top
 // ============================================
-window.addEventListener('scroll', function() {
-  if (backToTopBtn) {
-    if (window.scrollY > 300) {
-      backToTopBtn.classList.add('visible');
-    } else {
-      backToTopBtn.classList.remove('visible');
-    }
-  }
-});
-
-if (backToTopBtn) {
-  backToTopBtn.addEventListener('click', function() {
+(function() {
+  var btn = document.getElementById('backToTop');
+  if (!btn) return;
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  });
+  btn.addEventListener('click', function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-}
+})();
 
 // ============================================
 // Search
 // ============================================
-function openSearch() {
-  if (!searchOverlay) return;
-  searchOverlay.classList.add('active');
-  setTimeout(function() { searchInput && searchInput.focus(); }, 200);
-}
+(function() {
+  var overlay = document.getElementById('searchOverlay');
+  var input = document.getElementById('searchInput');
+  var results = document.getElementById('searchResults');
+  var closeBtn = document.getElementById('searchClose');
+  var toggle = document.querySelector('.search-toggle');
 
-function closeSearch() {
-  if (!searchOverlay) return;
-  searchOverlay.classList.remove('active');
-  if (searchInput) searchInput.value = '';
-  if (searchResults) searchResults.innerHTML = '';
-}
-
-if (searchToggle) {
-  searchToggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    openSearch();
-  });
-}
-
-if (searchClose) {
-  searchClose.addEventListener('click', closeSearch);
-}
-
-if (searchOverlay) {
-  searchOverlay.addEventListener('click', function(e) {
-    if (e.target === searchOverlay) closeSearch();
-  });
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeSearch();
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    openSearch();
+  function open() {
+    if (!overlay) return;
+    overlay.classList.add('active');
+    setTimeout(function() { input && input.focus(); }, 200);
   }
-});
+  function close() {
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    if (input) input.value = '';
+    if (results) results.innerHTML = '';
+  }
 
-if (searchInput) {
-  searchInput.addEventListener('input', function(e) {
-    var query = e.target.value.trim().toLowerCase();
-    if (!query) {
-      searchResults.innerHTML = '';
-      return;
-    }
+  if (toggle) toggle.addEventListener('click', function(e) { e.preventDefault(); open(); });
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  if (overlay) overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
 
-    var results = posts.filter(function(post) {
-      return post.title.toLowerCase().indexOf(query) !== -1 ||
-        post.excerpt.toLowerCase().indexOf(query) !== -1 ||
-        post.tags.some(function(t) { return t.toLowerCase().indexOf(query) !== -1; });
-    });
-
-    if (results.length === 0) {
-      searchResults.innerHTML = '<div class="search-empty">没有找到相关文章</div>';
-      return;
-    }
-
-    searchResults.innerHTML = results.map(function(post) {
-      return '<a href="post.html?id=' + post.id + '" class="search-result-item">' +
-        '<h4>' + post.title + '</h4>' +
-        '<p>' + post.date + ' · ' + post.category + '</p></a>';
-    }).join('');
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') close();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); open(); }
   });
-}
+
+  if (input) {
+    input.addEventListener('input', function(e) {
+      var q = e.target.value.trim().toLowerCase();
+      if (!q) { results.innerHTML = ''; return; }
+      var r = posts.filter(function(p) {
+        return p.title.toLowerCase().indexOf(q) !== -1 ||
+          p.excerpt.toLowerCase().indexOf(q) !== -1 ||
+          p.tags.some(function(t) { return t.toLowerCase().indexOf(q) !== -1; });
+      });
+      if (r.length === 0) { results.innerHTML = '<div class="search-empty">没有找到相关文章</div>'; return; }
+      results.innerHTML = r.map(function(p) {
+        return '<a href="post.html?id=' + p.id + '" class="search-result-item"><h4>' + p.title + '</h4><p>' + p.date + ' · ' + p.category + '</p></a>';
+      }).join('');
+    });
+  }
+})();
 
 // ============================================
-// Article Detail Page
+// Article Detail
 // ============================================
 function renderArticle() {
   var params = new URLSearchParams(window.location.search);
   var id = parseInt(params.get('id'));
   var post = posts.find(function(p) { return p.id === id; });
-
   if (!post) return;
 
   document.title = post.title + " - Contin's Blog";
+  var hero = document.getElementById('articleHero');
+  var title = document.getElementById('articleTitle');
+  var meta = document.getElementById('articleMeta');
+  var text = document.getElementById('articleText');
+  var tags = document.getElementById('articleTags');
+  var nav = document.getElementById('articleNav');
 
-  var heroEl = document.getElementById('articleHero');
-  var titleEl = document.getElementById('articleTitle');
-  var metaEl = document.getElementById('articleMeta');
-  var textEl = document.getElementById('articleText');
-  var tagsEl = document.getElementById('articleTags');
-  var navEl = document.getElementById('articleNav');
+  if (hero) hero.innerHTML = '<img src="' + post.cover + '" alt="' + post.title + '">';
+  if (title) title.textContent = post.title;
+  if (meta) meta.innerHTML = '<div class="post-meta-left"><span><i class="far fa-calendar-alt"></i> ' + post.date + '</span><span><i class="far fa-folder"></i> ' + post.category + '</span></div>';
+  if (text) text.innerHTML = post.content;
+  if (tags) tags.innerHTML = post.tags.map(function(t) { return '<span class="article-tag"># ' + t + '</span>'; }).join('');
 
-  if (heroEl) heroEl.innerHTML = '<img src="' + post.cover + '" alt="' + post.title + '">';
-  if (titleEl) titleEl.textContent = post.title;
-  if (metaEl) metaEl.innerHTML = '<div class="post-meta-left">' +
-    '<span><i class="far fa-calendar-alt"></i> ' + post.date + '</span>' +
-    '<span><i class="far fa-folder"></i> ' + post.category + '</span></div>';
-  if (textEl) textEl.innerHTML = post.content;
-  if (tagsEl) tagsEl.innerHTML = post.tags.map(function(t) {
-    return '<span class="article-tag"># ' + t + '</span>';
-  }).join('');
-
-  if (navEl) {
+  if (nav) {
     var idx = posts.findIndex(function(p) { return p.id === id; });
-    var navHTML = '';
-    if (idx > 0) {
-      var prev = posts[idx - 1];
-      navHTML += '<a href="post.html?id=' + prev.id + '"><i class="fas fa-arrow-left"></i> ' + prev.title + '</a>';
-    } else {
-      navHTML += '<span></span>';
-    }
-    if (idx < posts.length - 1) {
-      var next = posts[idx + 1];
-      navHTML += '<a href="post.html?id=' + next.id + '">' + next.title + ' <i class="fas fa-arrow-right"></i></a>';
-    }
-    navEl.innerHTML = navHTML;
+    var h = '';
+    if (idx > 0) h += '<a href="post.html?id=' + posts[idx-1].id + '"><i class="fas fa-arrow-left"></i> ' + posts[idx-1].title + '</a>';
+    else h += '<span></span>';
+    if (idx < posts.length - 1) h += '<a href="post.html?id=' + posts[idx+1].id + '">' + posts[idx+1].title + ' <i class="fas fa-arrow-right"></i></a>';
+    nav.innerHTML = h;
   }
 }
 
@@ -387,11 +317,11 @@ function renderArticle() {
 // Initialize
 // ============================================
 renderCategories();
-renderTags();
-renderPostList();
-renderRecent();
+renderTagsSidebar();
 renderArchives();
 renderProfileStats();
+renderPostList();
+renderRecent();
 
 if (document.getElementById('articleTitle')) {
   renderArticle();
