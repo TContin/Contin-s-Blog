@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>标签 - Contin's Blog</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .tags-page {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 24px;
+    }
+    .tags-page-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .tags-page-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+    .tags-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    .tag-chip:hover,
+    .tag-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+    .tag-chip .tag-chip-count {
+      font-size: 0.72rem;
+      background: rgba(255,255,255,0.2);
+      padding: 1px 8px;
+      border-radius: 10px;
+    }
+    .tag-chip:hover .tag-chip-count,
+    .tag-chip.active .tag-chip-count {
+      background: rgba(255,255,255,0.3);
+    }
+    .tag-posts-section {
+      margin-top: 32px;
+    }
+    .tag-posts-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-light);
+    }
+    .tag-post-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .tag-post-item:hover {
+      background: var(--accent-light);
+    }
+    .tag-post-item .tpi-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-width: 90px;
+    }
+    .tag-post-item .tpi-title {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+    .tag-post-item:hover .tpi-title {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i class="fas fa-blog"></i>
+        <span>Contin's Blog</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="archives.html">归档</a>
+        <a href="tags.html" class="active">标签</a>
+        <a href="links.html">友链</a>
+      </div>
+      <div class="nav-actions">
+        <a href="#" class="nav-icon" title="RSS"><i class="fas fa-rss"></i></a>
+        <a href="#" class="nav-icon search-toggle" title="搜索"><i class="fas fa-search"></i></a>
+        <a href="#" class="nav-icon theme-toggle" title="切换主题"><i class="fas fa-moon"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-modal">
+      <div class="search-header">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="搜索文章..." autocomplete="off">
+        <button class="search-close" id="searchClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <div class="tags-page">
+    <h1 class="tags-page-title"><i class="fas fa-tags" style="color:var(--accent)"></i> 标签</h1>
+    <p class="tags-page-desc">共计 <span id="totalTags">0</span> 个标签</p>
+    <div class="tags-cloud" id="tagsCloud"></div>
+    <div class="tag-posts-section" id="tagPosts"></div>
+  </div>
+
+  <!-- 回到顶部 -->
+  <button class="back-to-top" id="backToTop" title="回到顶部">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <footer class="footer">
+    <p>&copy; 2026 Contin's Blog. Powered with <i class="fas fa-heart" style="color:#e74c3c"></i> and curiosity.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function() {
+      const tagMap = {};
+      posts.forEach(p => {
+        p.tags.forEach(t => {
+          if (!tagMap[t]) tagMap[t] = [];
+          tagMap[t].push(p);
+        });
+      });
+
+      const tagNames = Object.keys(tagMap).sort((a, b) => tagMap[b].length - tagMap[a].length);
+      document.getElementById('totalTags').textContent = tagNames.length;
+
+      const cloudEl = document.getElementById('tagsCloud');
+      const postsEl = document.getElementById('tagPosts');
+
+      cloudEl.innerHTML = tagNames.map(t =>
+        `<span class="tag-chip" data-tag="${t}"># ${t} <span class="tag-chip-count">${tagMap[t].length}</span></span>`
+      ).join('');
+
+      function showTag(tag) {
+        document.querySelectorAll('.tag-chip').forEach(el => {
+          el.classList.toggle('active', el.dataset.tag === tag);
+        });
+        const tagPosts = tagMap[tag] || [];
+        postsEl.innerHTML = `
+          <h3 class="tag-posts-title"># ${tag}（${tagPosts.length} 篇）</h3>
+          ${tagPosts.map(p => `
+            <a href="post.html?id=${p.id}" class="tag-post-item">
+              <span class="tpi-date">${p.date}</span>
+              <span class="tpi-title">${p.title}</span>
+            </a>
+          `).join('')}
+        `;
+      }
+
+      cloudEl.addEventListener('click', (e) => {
+        const chip = e.target.closest('.tag-chip');
+        if (chip) showTag(chip.dataset.tag);
+      });
+
+      // 默认展示第一个标签
+      if (tagNames.length > 0) showTag(tagNames[0]);
+    })();
+  </script>
+</body>
+</html>

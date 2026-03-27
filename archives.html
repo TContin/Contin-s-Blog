@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>归档 - Contin's Blog</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .archive-page {
+      max-width: 800px;
+      margin: 80px auto 40px;
+      padding: 0 24px;
+    }
+    .archive-page-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .archive-page-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+    .archive-year-section {
+      margin-bottom: 36px;
+    }
+    .archive-year-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .archive-year-title .year-count {
+      font-size: 0.75rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .archive-item {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .archive-item:hover {
+      background: var(--accent-light);
+    }
+    .archive-item-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      min-width: 90px;
+    }
+    .archive-item-title {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+    .archive-item:hover .archive-item-title {
+      color: var(--accent);
+    }
+    .archive-item-cat {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: var(--bg-primary);
+      padding: 2px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i class="fas fa-blog"></i>
+        <span>Contin's Blog</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="archives.html" class="active">归档</a>
+        <a href="tags.html">标签</a>
+        <a href="links.html">友链</a>
+      </div>
+      <div class="nav-actions">
+        <a href="#" class="nav-icon" title="RSS"><i class="fas fa-rss"></i></a>
+        <a href="#" class="nav-icon search-toggle" title="搜索"><i class="fas fa-search"></i></a>
+        <a href="#" class="nav-icon theme-toggle" title="切换主题"><i class="fas fa-moon"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-modal">
+      <div class="search-header">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="搜索文章..." autocomplete="off">
+        <button class="search-close" id="searchClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <div class="archive-page">
+    <h1 class="archive-page-title"><i class="fas fa-archive" style="color:var(--accent)"></i> 归档</h1>
+    <p class="archive-page-desc">共计 <span id="totalPosts">0</span> 篇文章，持续更新中...</p>
+    <div id="archiveContent"></div>
+  </div>
+
+  <!-- 回到顶部 -->
+  <button class="back-to-top" id="backToTop" title="回到顶部">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <footer class="footer">
+    <p>&copy; 2026 Contin's Blog. Powered with <i class="fas fa-heart" style="color:#e74c3c"></i> and curiosity.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function() {
+      document.getElementById('totalPosts').textContent = posts.length;
+      const grouped = {};
+      posts.forEach(p => {
+        const year = p.date.split('-')[0];
+        if (!grouped[year]) grouped[year] = [];
+        grouped[year].push(p);
+      });
+      const years = Object.keys(grouped).sort((a, b) => b - a);
+      const container = document.getElementById('archiveContent');
+      container.innerHTML = years.map(year => `
+        <div class="archive-year-section">
+          <h2 class="archive-year-title">${year} <span class="year-count">${grouped[year].length} 篇</span></h2>
+          ${grouped[year].map(post => `
+            <a href="post.html?id=${post.id}" class="archive-item">
+              <span class="archive-item-date">${post.date}</span>
+              <span class="archive-item-title">${post.title}</span>
+              <span class="archive-item-cat">${post.category}</span>
+            </a>
+          `).join('')}
+        </div>
+      `).join('');
+    })();
+  </script>
+</body>
+</html>
