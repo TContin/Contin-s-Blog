@@ -45,13 +45,42 @@ if (themeToggle) {
 initTheme();
 
 // ============================================
-// Render Posts
+// Current filter state
 // ============================================
-function renderPosts() {
+let currentFilter = { type: null, value: null };
+
+// ============================================
+// Render Posts (with optional filter)
+// ============================================
+function renderPosts(filterType, filterValue) {
   if (!postListEl) return;
 
-  postListEl.innerHTML = posts.map(post => `
-    <article class="post-card">
+  let filtered = posts;
+  if (filterType === 'category') {
+    filtered = posts.filter(p => p.category === filterValue);
+  } else if (filterType === 'tag') {
+    filtered = posts.filter(p => p.tags.includes(filterValue));
+  } else if (filterType === 'year') {
+    filtered = posts.filter(p => p.date.startsWith(filterValue));
+  }
+
+  if (filterType) {
+    currentFilter = { type: filterType, value: filterValue };
+    const clearBtn = `<div class="filter-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:12px 16px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:0.88rem;">
+      <span><i class="fas fa-filter" style="margin-right:6px;color:var(--accent)"></i>筛选：${filterValue}（${filtered.length} 篇）</span>
+      <a href="#" onclick="clearFilter();return false;" style="color:var(--accent);font-weight:500;">清除筛选</a>
+    </div>`;
+    postListEl.innerHTML = clearBtn + filtered.map(post => renderPostCard(post)).join('');
+  } else {
+    currentFilter = { type: null, value: null };
+    postListEl.innerHTML = filtered.map(post => renderPostCard(post)).join('');
+  }
+
+  highlightSidebar();
+}
+
+function renderPostCard(post) {
+  return `<article class="post-card">
       <div class="post-cover">
         <a href="post.html?id=${post.id}">
           <img src="${post.cover}" alt="${post.title}" loading="lazy">
@@ -70,8 +99,25 @@ function renderPosts() {
           <a href="post.html?id=${post.id}" class="post-read-more">继续阅读</a>
         </div>
       </div>
-    </article>
-  `).join('');
+    </article>`;
+}
+
+function clearFilter() {
+  renderPosts();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function highlightSidebar() {
+  document.querySelectorAll('.category-list a').forEach(a => {
+    const name = a.querySelector('.cat-name')?.textContent;
+    a.style.background = (currentFilter.type === 'category' && currentFilter.value === name) ? 'var(--accent-light)' : '';
+    a.style.color = (currentFilter.type === 'category' && currentFilter.value === name) ? 'var(--accent)' : '';
+  });
+  document.querySelectorAll('.archive-list a').forEach(a => {
+    const year = a.querySelector('span')?.textContent;
+    a.style.background = (currentFilter.type === 'year' && currentFilter.value === year) ? 'var(--accent-light)' : '';
+    a.style.color = (currentFilter.type === 'year' && currentFilter.value === year) ? 'var(--accent)' : '';
+  });
 }
 
 // ============================================
@@ -97,7 +143,7 @@ function renderArchives() {
 
   archiveListEl.innerHTML = archives.map(a => `
     <li>
-      <a href="#">
+      <a href="#" onclick="renderPosts('year','${a.year}');return false;">
         <span>${a.year}</span>
         <span class="archive-count">${a.count}</span>
       </a>
