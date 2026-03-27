@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contin's Blog - 管理后台</title>
+  <link rel="icon" type="image/jpeg" href="/img/AvatarIcon.jpg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #333; min-height: 100vh; }
+
+    /* Login */
+    .login-wrapper { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 360px; }
+    .login-box h1 { font-size: 1.4rem; margin-bottom: 24px; text-align: center; color: #555; }
+    .login-box input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; }
+    .login-box input:focus { border-color: #999; }
+    .login-box button { width: 100%; padding: 12px; border: none; background: #555; color: #fff; border-radius: 8px; font-size: 0.95rem; cursor: pointer; margin-top: 16px; }
+    .login-box button:hover { background: #333; }
+    .login-error { color: #e74c3c; font-size: 0.85rem; margin-top: 8px; text-align: center; }
+
+    /* Layout */
+    .admin-header { background: #fff; border-bottom: 1px solid #eee; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .admin-header h1 { font-size: 1.1rem; color: #555; display: flex; align-items: center; gap: 8px; }
+    .admin-header .actions { display: flex; gap: 10px; }
+    .btn { padding: 8px 18px; border: none; border-radius: 6px; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #555; color: #fff; }
+    .btn-primary:hover { background: #333; }
+    .btn-danger { background: #e74c3c; color: #fff; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-outline { background: transparent; border: 1px solid #ccc; color: #666; }
+    .btn-outline:hover { background: #f0f0f0; }
+    .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
+
+    /* Post list */
+    .content { max-width: 960px; margin: 24px auto; padding: 0 20px; }
+    .post-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .post-list-header h2 { font-size: 1.1rem; color: #666; }
+    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .post-table th, .post-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+    .post-table th { background: #fafafa; color: #888; font-weight: 500; font-size: 0.85rem; }
+    .post-table td { font-size: 0.9rem; }
+    .post-table tr:last-child td { border-bottom: none; }
+    .post-table tr:hover td { background: #fafcff; }
+    .post-title-cell { font-weight: 500; color: #333; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .post-meta-cell { color: #999; font-size: 0.82rem; }
+    .post-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .post-tags span { background: #f0f1f3; color: #888; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+    .empty-state { text-align: center; padding: 80px 20px; color: #bbb; }
+    .empty-state p { font-size: 1rem; margin-bottom: 16px; }
+
+    /* Editor */
+    .editor-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; }
+    .editor-overlay.active { display: flex; align-items: center; justify-content: center; }
+    .editor-panel { background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; }
+    .editor-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+    .editor-header h2 { font-size: 1.05rem; color: #555; }
+    .editor-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 6px; font-weight: 500; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; }
+    .form-group input:focus, .form-group textarea:focus { border-color: #999; }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .editor-footer { padding: 16px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* Status */
+    .toast { position: fixed; top: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 0.88rem; z-index: 999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+    .toast.show { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .loading { pointer-events: none; opacity: 0.6; }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Login -->
+<div id="loginView" class="login-wrapper">
+  <div class="login-box">
+    <h1>Contin's Blog 管理后台</h1>
+    <input type="password" id="passwordInput" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登 录</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="adminView" style="display:none;">
+  <div class="admin-header">
+    <h1>Contin's Blog 管理后台</h1>
+    <div class="actions">
+      <button class="btn btn-outline btn-sm" onclick="window.open('/', '_blank')">查看博客</button>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="post-list-header">
+      <h2>文章管理</h2>
+      <button class="btn btn-primary" onclick="openEditor()">+ 新建文章</button>
+    </div>
+
+    <div id="postList"></div>
+  </div>
+</div>
+
+<!-- Editor -->
+<div id="editorOverlay" class="editor-overlay" onclick="if(event.target===this)closeEditor()">
+  <div class="editor-panel">
+    <div class="editor-header">
+      <h2 id="editorTitle">新建文章</h2>
+      <button class="btn btn-outline btn-sm" onclick="closeEditor()">关闭</button>
+    </div>
+    <div class="editor-body">
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>标题</label>
+        <input type="text" id="editTitle" placeholder="文章标题">
+      </div>
+      <div class="form-group">
+        <label>摘要</label>
+        <textarea id="editExcerpt" rows="2" placeholder="文章摘要，显示在首页卡片上"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>分类</label>
+          <input type="text" id="editCategory" placeholder="如：技术向、随笔录">
+        </div>
+        <div class="form-group">
+          <label>日期</label>
+          <input type="date" id="editDate">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>标签（逗号分隔）</label>
+          <input type="text" id="editTags" placeholder="JavaScript, 前端, React">
+        </div>
+        <div class="form-group">
+          <label>封面图 URL</label>
+          <input type="text" id="editCover" placeholder="https://images.unsplash.com/...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>正文（HTML 格式）</label>
+        <textarea id="editContent" rows="12" placeholder="<p>文章正文...</p>
+<h2>小标题</h2>
+<p>段落内容</p>
+<pre><code>代码块</code></pre>"></textarea>
+      </div>
+    </div>
+    <div class="editor-footer">
+      <button class="btn btn-outline" onclick="closeEditor()">取消</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="savePost()">发布</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/admin/api';
+let posts = [];
+
+// ============================================
+// Toast
+// ============================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ============================================
+// Auth
+// ============================================
+async function doLogin() {
+  const pw = document.getElementById('passwordInput').value;
+  const res = await fetch(API + '/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('adminView').style.display = 'block';
+    loadPosts();
+  } else {
+    document.getElementById('loginError').textContent = data.message || '密码错误';
+  }
+}
+
+async function doLogout() {
+  await fetch(API + '/logout', { method: 'POST' });
+  location.reload();
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch(API + '/check');
+    const data = await res.json();
+    if (data.authed) {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('adminView').style.display = 'block';
+      loadPosts();
+    }
+  } catch (e) {}
+}
+
+// ============================================
+// Posts CRUD
+// ============================================
+async function loadPosts() {
+  try {
+    const res = await fetch(API + '/posts');
+    const data = await res.json();
+    posts = data.posts || [];
+    renderPostList();
+  } catch (e) {
+    showToast('加载文章失败', 'error');
+  }
+}
+
+function renderPostList() {
+  const el = document.getElementById('postList');
+  if (posts.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>还没有文章</p><button class="btn btn-primary" onclick="openEditor()">写第一篇文章</button></div>';
+    return;
+  }
+  let html = '<table class="post-table"><thead><tr><th>标题</th><th>分类</th><th>日期</th><th>标签</th><th>操作</th></tr></thead><tbody>';
+  posts.forEach(p => {
+    html += '<tr>';
+    html += '<td class="post-title-cell">' + escHtml(p.title) + '</td>';
+    html += '<td class="post-meta-cell">' + escHtml(p.category) + '</td>';
+    html += '<td class="post-meta-cell">' + p.date + '</td>';
+    html += '<td><div class="post-tags">' + (p.tags || []).map(t => '<span>' + escHtml(t) + '</span>').join('') + '</div></td>';
+    html += '<td><button class="btn btn-outline btn-sm" onclick="openEditor(' + p.id + ')">编辑</button> ';
+    html += '<button class="btn btn-danger btn-sm" onclick="deletePost(' + p.id + ')">删除</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================
+// Editor
+// ============================================
+function openEditor(id) {
+  const overlay = document.getElementById('editorOverlay');
+  overlay.classList.add('active');
+  if (id) {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+    document.getElementById('editorTitle').textContent = '编辑文章';
+    document.getElementById('editId').value = id;
+    document.getElementById('editTitle').value = post.title;
+    document.getElementById('editExcerpt').value = post.excerpt;
+    document.getElementById('editCategory').value = post.category;
+    document.getElementById('editDate').value = post.date;
+    document.getElementById('editTags').value = (post.tags || []).join(', ');
+    document.getElementById('editCover').value = post.cover;
+    document.getElementById('editContent').value = post.content;
+    document.getElementById('saveBtn').textContent = '保存';
+  } else {
+    document.getElementById('editorTitle').textContent = '新建文章';
+    document.getElementById('editId').value = '';
+    document.getElementById('editTitle').value = '';
+    document.getElementById('editExcerpt').value = '';
+    document.getElementById('editCategory').value = '';
+    document.getElementById('editDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('editTags').value = '';
+    document.getElementById('editCover').value = '';
+    document.getElementById('editContent').value = '';
+    document.getElementById('saveBtn').textContent = '发布';
+  }
+}
+
+function closeEditor() {
+  document.getElementById('editorOverlay').classList.remove('active');
+}
+
+async function savePost() {
+  const id = document.getElementById('editId').value;
+  const body = {
+    title: document.getElementById('editTitle').value,
+    excerpt: document.getElementById('editExcerpt').value,
+    category: document.getElementById('editCategory').value,
+    date: document.getElementById('editDate').value,
+    tags: document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    cover: document.getElementById('editCover').value,
+    content: document.getElementById('editContent').value
+  };
+
+  if (!body.title) { showToast('请填写标题', 'error'); return; }
+
+  document.getElementById('saveBtn').classList.add('loading');
+  try {
+    const url = id ? API + '/posts/' + id : API + '/posts';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(id ? '文章已更新' : '文章已发布', 'success');
+      if (data.git && !data.git.success) {
+        showToast('Git 推送失败: ' + (data.git.error || ''), 'error');
+      }
+      closeEditor();
+      loadPosts();
+    } else {
+      showToast(data.message || '操作失败', 'error');
+    }
+  } catch (e) {
+    showToast('网络错误', 'error');
+  }
+  document.getElementById('saveBtn').classList.remove('loading');
+}
+
+async function deletePost(id) {
+  const post = posts.find(p => p.id === id);
+  if (!confirm('确定要删除「' + post.title + '」吗？')) return;
+
+  try {
+    const res = await fetch(API + '/posts/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('文章已删除', 'success');
+      loadPosts();
+    } else {
+      showToast(data.message || '删除失败', 'error');
+    }
+  } catch (e) {
+    showToast('网络错误', 'error');
+  }
+}
+
+// Init
+checkAuth();
+</script>
+</body>
+</html>
