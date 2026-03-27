@@ -199,14 +199,5 @@ type Required&lt;T&gt; = {
   }
 ];
 
-// 归档数据
-const archives = [
-  { year: 2026, count: 6 },
-  { year: 2025, count: 15 },
-  { year: 2024, count: 22 },
-  { year: 2023, count: 18 },
-  { year: 2022, count: 12 },
-  { year: 2021, count: 8 },
-  { year: 2020, count: 34 },
-  { year: 2019, count: 27 }
-];
+// 归档数据（由 app.js 根据 posts 动态计算）
+const archives = [];
