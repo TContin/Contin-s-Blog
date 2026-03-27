@@ -1,31 +1,5 @@
 // 博客文章数据
-const posts = [
-  {
-    id: 1,
-    title: "用 Docker 搭建开发环境",
-    date: "2026-03-27",
-    category: "技术向",
-    tags: ["Docker", "DevOps", "后端"],
-    cover: "https://images.unsplash.com/photo-1605745341112-85968b19335b?w=600&h=300&fit=crop",
-    excerpt: "Docker 让开发环境配置变得简单，本文介绍如何用 Docker Compose 搭建全栈开发环境。",
-    content: `
-<p>在团队协作中，环境一致性是困扰很多开发者的问题。</p>
-
-<h2>为什么选择 Docker？</h2>
-<p>Docker 容器化技术让我们可以将应用和运行环境打包在一起。</p>
-
-<h2>Docker Compose 实战</h2>
-<pre><code>version: '3.8'
-services:
- web:
- build: .
- ports:
- - "3000:3000"</code></pre>
-
-<blockquote>Docker 让"在我电脑上能跑"成为历史。</blockquote>
-`.trim()
-  }
-];
+const posts = [];
 
 // 归档数据（由 app.js 根据 posts 动态计算）
 const archives = [];
