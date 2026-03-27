@@ -7,7 +7,7 @@
 set -e
 
 # ========== 请修改以下配置 ==========
-GITHUB_REPO="https://github.com/你的用户名/Contin-s-Blog.git"  # 替换用户名
+GITHUB_REPO="https://github.com/TContin/Contin-s-Blog.git"
 SITE_DIR="/var/www/blog"        # 网站目录
 DOMAIN="yourdomain.com"         # 你的域名（可选，不用域名就用IP访问）
 WEBHOOK_SECRET="your-webhook-secret"  # Webhook 密钥，需和 GitHub 设置的一致

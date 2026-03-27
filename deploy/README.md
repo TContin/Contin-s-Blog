@@ -25,7 +25,7 @@ git init
 git add .
 git commit -m "Initial commit: my blog"
 git branch -M main
-git remote add origin https://github.com/你的用户名/Contin-s-Blog.git
+git remote add origin https://github.com/TContin/Contin-s-Blog.git
 git push -u origin main
 ```
 
@@ -35,7 +35,7 @@ SSH 登录到你的服务器后执行：
 
 ```bash
 # 1. 先克隆你的仓库
-git clone https://github.com/你的用户名/Contin-s-Blog.git /var/www/blog
+git clone https://github.com/TContin/Contin-s-Blog.git /var/www/blog
 
 # 2. 把 deploy 目录下的脚本也会一起克隆下来
 # 3. 修改 deploy.sh 中的配置（仓库地址、域名等）
@@ -118,7 +118,7 @@ jobs:
 
 ```bash
 # 克隆仓库
-git clone https://github.com/你的用户名/Contin-s-Blog.git /var/www/blog
+git clone https://github.com/TContin/Contin-s-Blog.git /var/www/blog
 
 # 配置 Nginx（复制 deploy/nginx.conf 到 /etc/nginx/sites-available/blog）
 sudo cp /var/www/blog/deploy/nginx.conf /etc/nginx/sites-available/blog
@@ -136,7 +136,7 @@ sudo nginx -t && sudo systemctl reload nginx
 2. Source 选择 `Deploy from a branch`
 3. Branch 选择 `main`，目录选 `/ (root)`
 4. 保存后等待几分钟
-5. 你的博客会部署在 `https://你的用户名.github.io/Contin-s-Blog/`
+5. 你的博客会部署在 `https://TContin.github.io/Contin-s-Blog/`
 
 > 每次 push 自动更新，零配置。
 

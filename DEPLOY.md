@@ -30,7 +30,7 @@ git add .
 git commit -m "初始化博客"
 
 # 2. 在 GitHub 上创建仓库，然后关联
-git remote add origin https://github.com/你的用户名/Contin-s-Blog.git
+git remote add origin https://github.com/TContin/Contin-s-Blog.git
 git branch -M main
 git push -u origin main
 ```
@@ -55,7 +55,7 @@ sudo yum install nginx git -y
 ```bash
 sudo mkdir -p /var/www/blog
 sudo chown $USER:$USER /var/www/blog
-git clone https://github.com/你的用户名/Contin-s-Blog.git /var/www/blog
+git clone https://github.com/TContin/Contin-s-Blog.git /var/www/blog
 ```
 
 ### 2.3 配置 Nginx
