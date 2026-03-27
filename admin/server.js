@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 // ============================================
 const CONFIG = {
   port: 3001,
-  password: 'changeme123',       // 管理后台密码，部署后请修改
+  password: 'k96017..',           // 管理后台密码
   blogDir: '/var/www/blog',      // 博客目录
   dataFile: '/var/www/blog/js/data.js',
 };
