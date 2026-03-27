@@ -1,12 +1,13 @@
 name: Deploy to Server
 
-# 只在手动触发时运行（不会在 push 时自动运行）
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -19,4 +20,4 @@ jobs:
             cd /var/www/blog
             git fetch origin main
             git reset --hard origin/main
-            echo "Deploy done: $(date)"
+            echo "Deployed at $(date)"
