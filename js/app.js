@@ -314,6 +314,66 @@ function renderArticle() {
 }
 
 // ============================================
+// Intro Overlay (first visit)
+// ============================================
+(function() {
+  var overlay = document.getElementById('introOverlay');
+  if (!overlay) return;
+
+  var KEY = 'blog-intro-dismissed-v1';
+  var dismissed = localStorage.getItem(KEY) === '1';
+  if (dismissed) return;
+
+  function open() {
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    // Lock scroll while overlay visible
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close() {
+    overlay.classList.add('closing');
+    localStorage.setItem(KEY, '1');
+    setTimeout(function() {
+      overlay.classList.remove('active');
+      overlay.classList.remove('closing');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }, 520);
+  }
+
+  // Click to close
+  overlay.addEventListener('click', function() {
+    close();
+  });
+
+  // Swipe up to close
+  var startY = null;
+  overlay.addEventListener('touchstart', function(e) {
+    if (!e.touches || e.touches.length === 0) return;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  overlay.addEventListener('touchmove', function(e) {
+    if (startY == null) return;
+    if (!e.touches || e.touches.length === 0) return;
+    var y = e.touches[0].clientY;
+    var dy = startY - y;
+    if (dy > 35) {
+      startY = null;
+      close();
+    }
+  }, { passive: true });
+
+  // Wheel up (desktop trackpad/mouse)
+  overlay.addEventListener('wheel', function(e) {
+    if (e.deltaY > 20) close();
+  }, { passive: true });
+
+  open();
+})();
+
+// ============================================
 // Initialize
 // ============================================
 renderCategories();

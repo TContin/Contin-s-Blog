@@ -907,3 +907,75 @@ ul {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+
+/* ============================================
+   Intro Overlay (first visit)
+   ============================================ */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  touch-action: none;
+}
+
+[data-theme="dark"] .intro-overlay {
+  background: rgba(0, 0, 0, 0.52);
+}
+
+.intro-overlay.active {
+  display: flex;
+}
+
+.intro-overlay.closing {
+  animation: introSlideUp 520ms ease forwards;
+}
+
+@keyframes introSlideUp {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-120%); opacity: 0; }
+}
+
+.intro-card {
+  width: min(360px, calc(100vw - 48px));
+  text-align: center;
+  padding: 28px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] .intro-card {
+  background: rgba(36, 37, 64, 0.72);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+
+.intro-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.intro-signature {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.intro-hint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
