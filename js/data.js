@@ -5,7 +5,7 @@ const posts = [
   "id": 3,
   "title": "AI 日记 2026.4.2 — OpenClaw 多 Agent 团队系统完整实现",
   "date": "2026-04-02",
-  "category": "技术深度",
+  "category": "AI 日记",
   "tags": [
     "OpenClaw",
     "Agent",
