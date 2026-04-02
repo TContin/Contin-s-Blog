@@ -2,6 +2,76 @@
 // Source: ./posts/*.md
 const posts = [
   {
+    "id": 2,
+    "title": "OpenClaw 多 Agent 团队系统完整搭建指南",
+    "date": "2026-04-02",
+    "category": "技术",
+    "tags": ["OpenClaw", "Agent", "自动化", "邮件系统", "安全"],
+    "cover": "https://images.unsplash.com/photo-1677442d019cecf8d491b94871578bfe?w=800",
+    "excerpt": "从零开始搭建了一套完整的 OpenClaw 多 Agent 协作系统。包含 5 个专业 Agent、邮件自动化、安全巡检和灾备方案。",
+    "content": `
+<h2>系统架构</h2>
+<p>我们设计了一个 5 人 Agent 团队，每个 Agent 有明确的职责定位：</p>
+<ul>
+<li><strong>Coco</strong> 🌸（微信）— 日常沟通 + 信息查询，用 Claude Haiku</li>
+<li><strong>LilyAn</strong> 🦊（Telegram）— 决策 + 任务分发，用 Claude Sonnet</li>
+<li><strong>Minto</strong> 💻（Telegram）— 代码 + 技术方案，用 Claude Opus</li>
+<li><strong>Sora</strong> 📊（Telegram）— 数据分析，用 GPT-5.2</li>
+<li><strong>Peko</strong> ✍️（Telegram）— 内容创作，用 GPT-5.2</li>
+</ul>
+
+<h2>邮件自动化系统</h2>
+<p><strong>验证码自动提取（1 分钟轮询）：</strong></p>
+<ul>
+<li>每 1 分钟检查最新 20 封邮件</li>
+<li>检测验证码邮件（关键词 + 6 位数字匹配）</li>
+<li>秒速提取并发到微信 Coco</li>
+<li>自动标记为已读</li>
+</ul>
+
+<p><strong>晚间汇总（每天 18:00）：</strong></p>
+<ul>
+<li>汇总当天所有非验证码邮件</li>
+<li>发到微信给用户查看</li>
+</ul>
+
+<h2>安全巡检与灾备</h2>
+<p><strong>每天 17:00 自动扫描 13 项安全指标：</strong></p>
+<ul>
+<li>OpenClaw 平台安全性</li>
+<li>网络进程监听</li>
+<li>SSH 密钥权限</li>
+<li>磁盘使用率</li>
+<li>DLP 敏感数据泄露检测</li>
+<li>技能文件完整性</li>
+</ul>
+
+<p><strong>每天 05:00 Git 自动备份：</strong></p>
+<ul>
+<li>备份到 GitHub 私有仓库</li>
+<li>包含全部配置和工作区</li>
+<li>支持完整恢复</li>
+</ul>
+
+<h2>LLM 模型分配策略</h2>
+<p>根据任务特点选择最优模型：</p>
+<ul>
+<li>Coco 用 Haiku（成本低，速度快）</li>
+<li>LilyAn 用 Sonnet（平衡性能和成本）</li>
+<li>Minto/Sora/Peko 用更强模型（重点任务）</li>
+</ul>
+
+<h2>关键配置修复</h2>
+<ul>
+<li>✅ Control UI allowedOrigins 改为白名单</li>
+<li>✅ 认证频率限制配置</li>
+<li>✅ 配置哈希基线更新</li>
+</ul>
+
+<p><strong>整个系统现在完全自动化、安全可靠，随时可用！🎉</strong></p>
+`
+  },
+  {
     "id": 1,
     "title": "Claude Code 你想知道的所有秘密——源码深度研究报告",
     "date": "2026-04-01",
