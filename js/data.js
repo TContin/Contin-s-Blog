@@ -1,20 +1,3 @@
-const posts = [
-  {
-    "id": 3,
-    "title": "AI 日记 2026.4.2 — OpenClaw 多 Agent 团队系统完整实现",
-    "date": "2026-04-02",
-    "category": "AI 日记",
-    "tags": [
-      "OpenClaw",
-      "Agent",
-      "系统设计",
-      "成本优化",
-      "安全架构"
-    ],
-    "cover": "https://images.unsplash.com/photo-1677442d019cecf8d491b94871578bfe?w=800",
-    "excerpt": "从架构设计、工程实现、成本优化到安全加固——完整记录今天搭建的多 Agent 系统。",
-    "content": "<h1>AI 日记 2026.4.2 — OpenClaw 多 Agent 团队系统完整实现</h><p>从早上 10 点到现在，我用 OpenClaw 搭建了一套完整的多 Agent 协作系统。不是简单的 prompt 调优，而是从架构层、工程层、安全层做了整体设计。</p><h2>一、为什么需要多 Agent？</h><p>最初的想法很简单：一个强大的 LLM 能搞定一切吗？</p><p>不能。原因有三：</p><p><strong>1. 能力边界不同</strong><br /><li>代码实现需要深度推理（Claude Opus）<br /><li>日常沟通需要快速响应（Claude Haiku）<br /><li>数据分析需要特定能力（GPT 系列）<br /><li>内容创作又是另一种风格</p><p>用同一个 LLM 处理所有任务，就像用扳手钉钉子一样——虽然能钉，但不是最优的。</p><p><strong>2. 成本与延迟矛盾</strong><br /><li>强模型（Opus）token 成本高，不适合日常小问题<br /><li>弱模型（Haiku）便宜快速，但处理不了复杂推理</p><p>如果所有请求都用 Opus，成本会 5 倍增长。如果都用 Haiku，用户体验会下降。</p><p><strong>3. 上下文窗口问题</strong><br /><li>一个 Agent 处理太多不同类型的任务，上下文会混乱<br /><li>每个 Agent 专注一个领域，能保持清晰的思考链</p><p>所以我设计了 5 个专业 Agent，每个各司其职。</p><h2>二、系统架构设计</h><h3>2.1 五大 Agent 与职责</h><hr /></p><p><strong>各 Agent 详细职责：</strong></p><p>Agent | 渠道 | 模型 | 成本 | 延迟 | 主要职责 | 工作范围 |<br />|-------|------|------|------|------|---------|---------|<br />Coco | 微信 | Haiku | $0.8/M tokens | <1s | 入口过滤、日常问答 | 接收需求、快速回复、信息查询（邮件、文件等） |<br />LilyAn | Telegram | Sonnet | $3/M tokens | 1-2s | 决策分发、结果整合 | 需求分析、任务拆解、分发给各 Agent、汇总结果 |<br />Minto | Telegram | Opus | $15/M tokens | 3-5s | 代码实现、技术方案 | 编程、系统设计、架构、调试、技术咨询 |<br />Sora | Telegram | GPT-5.2 | 高 | 2-3s | 数据分析、结构化输出 | 数据处理、图表生成、复盘报告、市场分析 |<br />Peko | Telegram | GPT-5.2 | 高 | 2-3s | 内容创作、发布管理 | 文章写作、文案润色、博客发布、创意输出 |</p><h3>2.2 为什么这样分工？</h><p><strong>Coco 用 Haiku 而不是更强的模型：</strong></p><hr /></p><p><strong>LilyAn 用 Sonnet：</strong><br /><li>需要推理能力判断需求（中等复杂度）<br /><li>不需要最强能力，Sonnet 的 $3 定价性价比最优<br /><li>速度快（1-2秒），用户体验好</p><p><strong>Minto/Sora/Peko 用强模型：</strong><br /><li>代码和创意任务需要最佳质量<br /><li>这些是真正的瓶颈任务，成本不是主要考虑</p><h2>三、跨端协作方案（微信 + Telegram）</h><h3>3.1 为什么这么分？</h><hr /></p><p><strong>最优方案：</strong><br /><li>Coco 在微信处理日常，快速响应<br /><li>复杂任务转到 Telegram 的 LilyAn 进行专��处理<br /><li>各 Agent 也都在 Telegram，便于实时反馈</p><h3>3.2 跨端消息流实现</h><hr /></p><p><strong>关键设计点：</strong></p><p>1. <strong>避免重复处理</strong> — 每个消息带唯一 ID，状态文件记录已处理<br />2. <strong>避免消息丢失</strong> — 用 SQLite 持久化状态，重启后能恢复<br />3. <strong...[文章已更新，请刷新页面查看完整内容]"
-  }
-];
+const posts = [];
 
 if (typeof module !== "undefined") module.exports = { posts };
