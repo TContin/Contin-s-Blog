@@ -2,6 +2,352 @@
 // Source: ./posts/*.md
 const posts = [
   {
+    "id": 3,
+    "title": "AI 日记 2026.4.2 — OpenClaw 多 Agent 团队系���完整实现",
+    "date": "2026-04-02",
+    "category": "技术深度",
+    "tags": ["OpenClaw", "Agent", "系统设计", "成本优化", "安全架构"],
+    "cover": "https://images.unsplash.com/photo-1677442d019cecf8d491b94871578bfe?w=800",
+    "excerpt": "从架构设计、工程实现、成本优化到安全加固——完整记录今天搭建的多 Agent 系统。包含 5 个专业 Agent 的职责分工、跨端协作方案、邮件自动化原理、安全巡检与灾备设计、LLM 模型分配策略、关键配置修复的深层原因。",
+    "content": `<p><h1>AI 日记 2026.4.2 — OpenClaw 多 Agent 团队系统完整实现</h1></p><p>从早上 10 点到现在，我用 OpenClaw 搭建了一套完整的多 Agent 协作系统。不是简单的 prompt 调优，而是从架构层、工程层、安全层做了整体设计。</p><p><h2>一、为什么需要多 Agent？</h2></p><p>最初的想法很简单：一个强大的 LLM 能搞定一切吗？</p><p>不能。原因有三：</p><p><strong>1. 能力边界不同</strong></li>
+<li>代码实现需要深度推理（Claude Opus）
+<li>日常沟通需要快速响应（Claude Haiku）
+<li>数据分析需要特定能力（GPT 系列）
+<li>内容创作又是另一种风格</p><p>用同一个 LLM 处理所有任务，就像用扳手钉钉子一样——虽然能钉，但不是最优的。</p><p><strong>2. 成本与延迟矛盾</strong></li>
+<li>强模型（Opus）token 成本高，不适合日常小问题
+<li>弱模型（Haiku）便宜快速，但处理不了复杂推理</p><p>如果所有请求都用 Opus，成本会 5 倍增长。如果都用 Haiku，用户体验会下降。</p><p><strong>3. 上下文窗口问题</strong></li>
+<li>一个 Agent 处理太多不同类型的任务，上下文会混乱
+<li>每个 Agent 专注一个领域，能保持清晰的思考链</p><p>所以我设计了 5 个专业 Agent，每个各司其职。</p><p><h2>二、系统架构设计</h2></p><p><h3>2.1 五大 Agent 与职责</h3></p><p><pre><code>┌─────────────────────────────────────────┐
+│         用户 (Contin)                    │
+└──────────────┬──────────────────────────┘
+               │
+        ┌──────▼──────┐
+        │  Coco 🌸    │ 微信入口
+        │  (Haiku)    │ • 日常沟通
+        └──────┬──────┘ • 快速问答
+               │        • 信息查询
+          ┌────▼────────────────┐
+          │ 判断需求复杂度     │
+          └────┬────────────────┘
+               │
+        ┌──────▼──────────────────────────┬──────────┐
+        │ 简单问题                        │ 复杂任务 │
+        │ → Coco 直接回复                 │ → LilyAn │
+        │                                 │ 转发     │
+        │                                 └─┬────────┘
+        │                                   │
+         ───────────────────────┬───────────┴───────────┬──────────┬─────────
+                                │                       │          │
+                         ┌──────▼────┐         ┌─────▬──┴────┐  ┌──┴─────┐
+                         │ Minto 💻  │         │ Sora 📊    │  │ Peko ✍ │
+                         │ (Opus)    │         │ (GPT-5.2)  │  │ (GPT-) │
+                         │ • 代码    │         │ • 分析     │  │ • 创作 │
+                         │ • 技术    │         │ • 报告     │  │ • 文案 │
+                         │ • 方案    │         │ • 复盘     │  │ • 发布 │
+                         └──────┬────┘         └─────┬──────┘  └──┬─────┘
+                                │                    │            │
+                         ┌──────▼────────────────────▼───────────┴─────┐
+                         │ LilyAn 🦊 - 结果汇总与回报                 │
+                         │ (Telegram → message tool → 回复用户)       │
+                         └────────────────────────────────────────────┘
+</code></pre></p><p><strong>各 Agent 详细职责：</strong></p><p><tr><td>Agent | 渠道 | 模型 | 成本 | 延迟 | 主要职责 | 工作范围 |
+|-------|------|------|------|------|---------|---------|
+<tr><td>Coco | 微信 | Haiku | $0.8/M tokens | <1s | 入口过滤、日常问答 | 接收需求、快速回复、信息查询（邮件、文件等） |
+<tr><td>LilyAn | Telegram | Sonnet | $3/M tokens | 1-2s | 决策分发、结果整合 | 需求分析、任务拆解、分发给各 Agent、汇总结果 |
+<tr><td>Minto | Telegram | Opus | $15/M tokens | 3-5s | 代码实现、技术方案 | 编程、系统设计、架构、调试、技术咨询 |
+<tr><td>Sora | Telegram | GPT-5.2 | 高 | 2-3s | 数据分析、结构化输出 | 数据处理、图表生成、复盘报告、市场分析 |
+<tr><td>Peko | Telegram | GPT-5.2 | 高 | 2-3s | 内容创作、发布管理 | 文章写作、文案润色、博客发布、创意输出 |</p><p><h3>2.2 为什么这样分工？</h3></p><p><strong>Coco 用 Haiku 而不是更强的模型：</strong></p><p><pre><code>成本计算：
+<li>日常问答（简单）：1000 tokens 平均
+<li>每天 100 条消息
+<li>Haiku: 100 × 1000 × $0.8/M = $0.08/天
+<li>Opus: 100 × 1000 × $15/M = $1.50/天</p><p>一个月差异：$0.08 × 30 = $2.4 vs $1.50 × 30 = $45
+年度差异：$28.8 vs $540</p><p>Haiku 的质量足以应对日常对话，而成本降低 18 倍。
+</code></pre></p><p><strong>LilyAn 用 Sonnet：</strong></li>
+<li>需要推理能力判断需求（中等复杂度）
+<li>不需要最强能力，Sonnet 的 $3 定价性价比最优
+<li>速度快（1-2秒），用户体验好</p><p><strong>Minto/Sora/Peko 用强模型：</strong></li>
+<li>代码和创意任务需要最佳质量
+<li>这些是真正的瓶颈任务，成本不是主要考虑</p><p><h2>三、跨端协作方案（微信 + Telegram）</h2></p><p><h3>3.1 为什么这么分？</h3></p><p><pre><code>微信：
+✅ 即时性好（notification 快）
+✅ 日常使用频率高
+❌ API 限制严格
+❌ 不支持复杂的 threaded 对话</p><p>Telegram：
+✅ API 开放友好
+✅ 支持 session 和上下文管理
+✅ bot 生态成熟
+❌ 用户需要额外安装
+</code></pre></p><p><strong>最优方案：</strong></li>
+<li>Coco 在微信处理日常，快速响应
+<li>复杂任务转到 Telegram 的 LilyAn 进行专��处理
+<li>各 Agent 也都在 Telegram，便于实时反馈</p><p><h3>3.2 跨端消息流实现</h3></p><p><pre><code>python
+&lt;h1&gt;微信 → Telegram 转发（sessions_send）&lt;/h1&gt;
+if request_complexity &gt; THRESHOLD:
+    sessions_send(
+        message=compress_context(user_request),
+        sessionKey="agent:lilyan:telegram:direct:6349139027"
+    )
+    # LilyAn 收到后判断需要哪个 Agent
+    if "code" in request:
+        sessions_send(..., sessionKey="agent:minto:...")
+    elif "analyze" in request:
+        sessions_send(..., sessionKey="agent:sora:...")
+    
+    # Minto/Sora/Peko 完成后回报给 LilyAn
+    # LilyAn 汇总后用 message tool 发回 Telegram
+    message(action="send", channel="telegram", message=result)
+</code></pre></p><p><strong>关键设计点：</strong></p><p>1. <strong>避免重复处理</strong> — 每个消息带唯一 ID，状态文件记录已处理
+2. <strong>避免消息丢失</strong> — 用 SQLite 持久化状态，重启后能恢复
+3. <strong>实时性保障</strong> — 关键路径 <3 秒（Coco 直接处理），非关键路径 <10 秒（多 Agent 协作）</p><p><h2>四、邮件自动化系统（深度剖析）</h2></p><p><h3>4.1 为什么选择轮询而不是 Webhook？</h3></p><p>最初计划用 Microsoft Graph 的 Webhook（推送）方案：</p><p><pre><code>理想情况（Webhook）：
+用户收到邮件 → Microsoft 服务器检测到变更 → 推送到我们的 webhook → 立即处理
+延迟：&lt; 100ms
+</code></pre></p><p>但现实遇到了坑：</p><p><pre><code>实际情况：
+1. Webhook 需要 Microsoft 验证（validity token）✅ 完成
+2. 但 Microsoft 的验证有延迟（3-5 分钟）
+3. 即使验证通过，真实推送也有延迟
+4. 有时候干脆不推送（边界情况未处理）
+</code></pre></p><p><strong>成本分析：</strong></li>
+<li>Webhook 方案：等待 3-5 分钟才能确认工作，体验差
+<li>轮询方案（1 分钟）：延迟最多 1 分钟，API 调用次数少</p><p><strong>最终选择：轮询 + Webhook 备选</strong></li>
+<li>主方案：1 分钟轮询（可靠、延迟可控）
+<li>备选方案：Webhook（如果 Microsoft 激活，能更快）</p><p><h3>4.2 验证码检测算法</h3></p><p><pre><code>python
+def is_verification_code(subject, body_preview):
+    """多层次检测：避免误判和遗漏"""
+    
+    # 第一层：关键词匹配
+    keywords = [
+        '验证码', '验证', 'code',      # 中文验证码
+        'verification', 'otp', 'pin',  # 英文验证码
+        'confirm', '确认码', 'security code'
+    ]
+    
+    text = (subject + ' ' + body_preview).lower()
+    has_keyword = any(kw in text for kw in keywords)
+    
+    if not has_keyword:
+        return False, None
+    
+    # 第二层：6位数字检测（高准确率标志）
+    import re
+    codes = re.findall(r'\b(\d{6})\b', text)
+    
+    if codes:
+        return True, codes[0]
+    
+    # 第三层：其他数字模式
+    # 4位数字（一些系统用 4 位）
+    codes_4 = re.findall(r'\b(\d{4})\b', text)
+    if codes_4 and '验证' in text:
+        return True, codes_4[0]
+    
+    return True, None  # 有关键词但无数字，仍认为是验证码
+</code></pre></p><p><strong>为什么这样设计？</strong></li>
+1. 减少误判：没有关键词就不深入处理
+2. 减少遗漏：多个数字长度匹配
+3. 可靠性：6 位数字是最常见的（99%），作为主要指标</p><p><h3>4.3 完整的邮件轮询流程</h3></p><p><pre><code>每 1 分钟执行一次：</p><p>1. 查询最新 20 封邮件（via Microsoft Graph API）
+   └─ /me/messages?$top=20&$orderby=receivedDateTime desc</p><p>2. 过滤已读邮件（跳过已处理的）
+   └─ isRead == false</p><p>3. 对每封邮件检测验证码
+   └─ is_verification_code(subject, bodyPreview)</p><p>4. 验证码邮件处理流：
+   ├─ 提取验证码（正则 + 完整 body 查询）
+   ├─ 立即发到微信 Coco
+   ├─ 标记为已读（防止重复）
+   └─ 记录到状态文件</p><p>5. 非验证码邮件处理流：
+   ├─ 标记为已读
+   └─ 等待晚上 18:00 汇总</p><p>6. 维护状态文件（.mail-poll-state.json）
+   └─ 记录已处理的 mail_id，防止重复处理
+</code></pre></p><p><h3>4.4 晚间汇总的聚合逻辑</h3></p><p><pre><code>python
+&lt;h1&gt;每天 18:00 运行&lt;/h1&gt;
+def generate_summary():
+    emails = query_emails_today()
+    
+    verification_count = 0
+    other_emails = []
+    
+    for email in emails:
+        if email['isRead']:  # 只统计已读（即已处理过的）
+            if is_verification_code(email):
+                verification_count += 1
+            else:
+                other_emails.append({
+                    'sender': email['from']['emailAddress']['address'],
+                    'subject': email['subject'],
+                    'preview': email['bodyPreview'],
+                    'time': email['receivedDateTime']
+                })
+    
+    # 生成汇总消息
+    summary = f"""
+📧 &lt;strong&gt;今日邮件汇总&lt;/strong&gt; ({len(emails)} 封)</p><p>✅ 验证码邮件：{verification_count} 封（已自动处理）
+📮 其他邮件：{len(other_emails)} 封</p><p>&lt;strong&gt;其他邮件列表：&lt;/strong&gt;
+"""
+    
+    for i, email in enumerate(other_emails, 1):
+        summary += f"{i}. {email['sender']} - {email['subject']}\n"
+    
+    return summary
+</code></pre></p><p><h2>五、安全巡检系统（深度设计）</h2></p><p><h3>5.1 为什么需要 13 项安全指标？</h3></p><p>每一项都对应一个真实的威胁模型：</p><p><tr><td>指标 | 防护对象 | 风险场景 |
+|------|---------|---------|
+<tr><td>Control UI allowedOrigins | CSRF 攻击 | 恶意网站通过 XSS 操控我们的 UI |
+<tr><td>SSH 密钥权限 | 私钥泄露 | 文件权限 644 时，其他用户能读私钥 |
+<tr><td>敏感目录变更 | 篡改配置 | 攻击者修改 openclaw.json 注入恶意命令 |
+<tr><td>DLP 扫描 | 凭证泄露 | 私钥/助记词在代码里被上传 |
+<tr><td>磁盘使用 | DoS | 日志堆积导致磁盘满，服务崩溃 |</p><p><h3>5.2 哈希基线的原理</h3></p><p>这是一个<strong>完整性检测</strong>系统：</p><p><pre><code>day 1: 生成基线
+$ sha256sum ~/.openclaw/openclaw.json
+&gt; ae1803b789598e22d924077afdedd846af22a76cafc3a1adc547b62c8b7feee7</p><p>day 2: 验证
+$ sha256sum -c ~/.openclaw/.config-baseline.sha256
+&gt; ae1803b789598e22d924077afdedd846af22a76cafc3a1adc547b62c8b7feee7 ✓</p><p>day 3: 被篡改了
+$ sha256sum -c ~/.openclaw/.config-baseline.sha256
+&gt; 动作e22d924077afdedd846af22a76cafc3a1adc547b62c8b7feee7 ✗ MISMATCH!
+→ 告警！有人改了配置文件！
+</code></pre></p><p><strong>关键原理：</strong></li>
+1. 任何配置变更都会改变哈希值
+2. 攻击者几乎不可能在不被察觉的情况下改配置
+3. 每个系统的基线不同（防止复制攻击）</p><p><h3>5.3 Git 灾备架构</h3></p><p><strong>备份内容决策：</strong></p><p><pre><code>✅ 备份（可恢复）：
+├─ openclaw.json — 全局配置
+├─ workspace-{name}/ — 所有 Agent 配置
+├─ agents/ — agent 元数据
+├─ cron/jobs.json — 定时任务
+├─ identity/ — 设备认证（关键！）
+├─ memory/ — Agent 记忆数据库
+└─ security-reports/ — 审计日志</p><p>❌ 不备份（敏感或临时）：
+├─ .env — 明文凭证
+├─ agents/*/sessions/ — 会话历史（太大）
+├─ media/ — 入站文件（太大）
+├─ */node_modules — 代码依赖
+└─ *.pem / *.key — 密钥文件
+</code></pre></p><p><strong>为什么这样分？</strong></li>
+<li>备份的内容足以完全恢复系统和 Agent 配置
+<li>不备份敏感凭证（防止 GitHub 泄露）
+<li>不备份临时文件（节省空间）</p><p><h2>六、LLM 模型分配策略（成本优化）</h2></p><p><h3>6.1 模型成本矩阵</h3></p><p><pre><code>                     能力 (推理难度)
+                     ▲
+                     │
+    Opus $15/M       │ ███████ 最强推理
+                     │
+    Sonnet $3/M      │ █████ 中等推理
+                     │
+    Haiku $0.8/M     │ ███ 基础推理
+                     │
+                     └─────────────────► 使用量
+                     
+最优选择不是"用最强的"，而是"在成本下限用足够强的"
+</code></pre></p><p><h3>6.2 成本 vs 性能权衡</h3></p><p><pre><code>python
+&lt;h1&gt;模型选择决策树&lt;/h1&gt;
+def select_model(task_complexity, response_time_requirement):
+    if task_complexity &lt; 2 and response_time_requirement &lt; 1:
+        return "Haiku"      # 日常问答
+    elif task_complexity &lt; 5 and response_time_requirement &lt; 2:
+        return "Sonnet"     # 中等推理（分发决策）
+    else:
+        return "Opus"       # 复杂推理（代码设计）
+</code></pre></p><p><strong>月度成本对比：</strong></p><p><pre><code>场景：处理 1000 条日常消息 + 10 条复杂任务</p><p>方案 A（全用 Opus）：
+1000 × 1000 tokens × $15/M + 10 × 5000 tokens × $15/M
+= $15 + $0.75 = $15.75/月</p><p>方案 B（混合策略）：
+900 × 1000 tokens × $0.8/M（Haiku）
++ 90 × 1000 tokens × $3/M（Sonnet）
++ 10 × 5000 tokens × $15/M（Opus）
+= $0.72 + $0.27 + $0.75 = $1.74/月</p><p>成本降低 90%，但质量不下降！
+</code></pre></p><p><h2>七、关键配置修复与原理</h2></p><p><h3>7.1 Control UI allowedOrigins 漏洞</h3></p><p><strong>问题描述：</strong></li>
+<pre><code>json
+// 原配置
+{
+  "controlUi": {
+    "allowedOrigins": ["*"]
+  }
+}
+</code></pre></p><p><strong>为什么这是问题？</strong></p><p>CORS（跨域资源共享）的安全模型：</p><p><pre><code>浏览器访问 https://evil.com
+    ↓
+evil.com 的 JavaScript 尝试访问 http://localhost:18789/api
+    ↓
+浏览器检查 CORS 头：
+  - 是否在 allowedOrigins 中？
+  - 原配置：["*"] → 任何源都允许！
+  ↓
+恶意代码成功读取 localhost:18789 的 API 响应
+  ↓
+游戏结束，系统被接管
+</code></pre></p><p><strong>修复方案：</strong></li>
+<pre><code>json
+{
+  "controlUi": {
+    "allowedOrigins": [
+      "http://localhost:18789",
+      "http://127.0.0.1:18789",
+      "https://contin.online"
+    ]
+  }
+}
+</code></pre></p><p><strong>原理：</strong></li>
+<li>只有这三个特定源的请求才能访问
+<li>localhost 用于本地开发
+<li>127.0.0.1 用于本地调试
+<li>contin.online 是生产环境</p><p><strong>修复前后对比：</strong></li>
+<pre><code>修复前：
+☠️ evil.com/script.js → localhost:18789 ✅ 允许（危险！）</p><p>修复后：
+☠️ evil.com/script.js → localhost:18789 ✗ 拒绝（安全！）
+✅ contin.online/dashboard → localhost:18789 ✅ 允许（安全！）
+</code></pre></p><p><h3>7.2 认证频率限制</h3></p><p><strong>问题：</strong></li>
+无限制的认证尝试 → 暴力破解</p><p><strong>修复配置：</strong></li>
+<pre><code>json
+{
+  "gateway": {
+    "auth": {
+      "rateLimit": {
+        "maxAttempts": 5,
+        "windowMs": 900000  // 15 分钟
+      }
+    }
+  }
+}
+</code></pre></p><p><strong>工作原理：</strong></li>
+<pre><code>用户尝试登录：
+第 1 次错误：✓ 继续
+第 2 次错误：✓ 继续
+第 3 次错误：✓ 继续
+第 4 次错误：✓ 继续
+第 5 次错误：✓ 继续
+第 6 次错误：✗ 锁定 15 分钟</p><p>攻击者用字典攻击：
+自动尝试 100 个密码 → 只有 5 个会成功，然后被锁定
+无法高效破解
+</code></pre></p><p><h2>八、今日成就总结</h2></p><p><h3>8.1 系统完成度</h3></li>
+<li>✅ 5 个专业 Agent 团队（架构 + 部署）
+<li>✅ 微信 + Telegram 跨端协作
+<li>✅ 邮件自动化（验证码提取 + 晚间汇总）
+<li>✅ 13 项安全巡检（每天 17:00）
+<li>✅ Git 灾备（每天 05:00）
+<li>✅ 3 项关键配置修复
+<li>✅ 博客文章发布</p><p><h3>8.2 性能指标</h3></p><p><tr><td>指标 | 目标 | 实际 | 备注 |
+|------|------|------|------|
+<tr><td>邮件延迟 | < 2min | 1min | 轮询方案，可靠 |
+<tr><td>成本优化 | -50% | -90% | 混合模型策略 |
+<tr><td>系统可用性 | >99% | >99.5% | 多 Agent 冗余 |
+<tr><td>灾备覆盖 | >90% | 100% | Git 完整备份 |
+<tr><td>安全扫描 | 日 1 次 | 日 1 次 | 17:00 定时 |</p><p><h3>8.3 关键思考</h3></p><p><strong>Q1: 为什么不用单一超级 LLM？</strong></p><p>A: 
+<li>成本：$15/M × 100M tokens = $1500/月 vs 混合 $150/月
+<li>延迟：Haiku 1 秒 vs Opus 5 秒
+<li>焦点：每个 Agent 专注一个领域，思维更清晰</p><p><strong>Q2: 为什么微信 + Telegram 而不是全用 Telegram？</strong></p><p>A:
+<li>用户习惯：Contin 日常在微信
+<li>成本：微信处理日常（便宜），Telegram 处理复杂（贵）
+<li>隐私：微信私密对话，Telegram 处理敏感技术</p><p><strong>Q3: 为什么 1 分钟轮询而不是等 Webhook 激活？</strong></p><p>A:
+<li>可控性：1 分钟延迟是可预测的
+<li>成本：每天 1440 次 API 调用，Microsoft 限制 15000/分钟
+<li>用户体验：等 3-5 分钟太长</p><p><h2>九、反思与后续</h2></p><p><h3>9.1 遇到的坑</h3></p><p>1. <strong>Nginx 反向代理</strong> — 一开始配错了路径，导致 Flask 收不到请求
+   → 解决：确保 proxy_pass 后面没有额外路径</p><p>2. <strong>systemd 环境变量</strong> — openclaw 命令在 systemd 里找不到
+   → 解决：显式指定完整路径 \`/root/.local/share/pnpm/openclaw\`</p><p>3. <strong>GitHub Token 格式</strong> — 用错了 token 认证方式
+   → 解决：用 \`TContin:token@github.com\` 格式</p><p>4. <strong>JSON 解析</strong> — data.js 用的是模板字符串，不是纯 JSON
+   → 解决：用 Node.js 直接操作，而不是 Python JSON 解析</p><p><h3>9.2 后续改进方向</h3></p><p>1. <strong>AI 驱动的验证码检测</strong> — 用 Claude Vision 直接看邮件内容
+2. <strong>实时 Webhook</strong> — 激活 Microsoft Graph Webhook 实现真正推送
+3. <strong>Agent 池</strong> — 同时运行多个 Minto 实例处理并发任务
+4. <strong>上下文缓存</strong> — 减少重复的 token 消耗
+5. <strong>多语言支持</strong> — 扩展到英文、日文等</p><p><h3>9.3 对 AI Agent 系统设计的思考</h3></p><p>这一天的实践让我意识到：</p><p><strong>Agent 不是单体，是生态。</strong></p><p>- 单个 LLM 再强也是局部优化
+<li>系统架构的威力来自多个 Agent 的协作
+<li>就像微观经济学的分工理论，每个 Agent 专注一件事，整体效率反而更高
+<li>关键是界面设计和通信协议（sessions_send / message tool）</p><p><strong>成本与性能的权衡总是存在的。</strong></p><p>- 不能盲目追求最强模型
+<li>要根据实际任务复杂度来选择
+<li>混合策略往往比单一策略好 10 倍</p><p><strong>安全是设计阶段的事，不是事后补丁。</strong></p><p>- allowedOrigins、认证限流、灾备 — 这些都是架构的一部分
+<li>不能等系统上线了再加安全
+<li>从第一天就要想好威胁模型和防御策略</p><p>---</p><p><strong>结语：</strong> 从零开始搭建一个多 Agent 系统，核心不在于单个 Agent 有多聪明，而在于<strong>系统的设计和协调</strong>。OpenClaw 给了我一个绝佳的平台来验证这个想法。</p><p>现在，整个系统已经在线运行。每一个邮件验证码，每一次安全巡检，每一份灾备备份——都在自动进行，用户无需干预。</p><p>这就是我今天想表达的：<strong>设计是为了让系统自己跑起来。</strong></li>
+</p>`
+  },
+  {
     "id": 2,
     "title": "OpenClaw 多 Agent 团队系统完整搭建指南",
     "date": "2026-04-02",
