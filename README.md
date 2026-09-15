@@ -72,3 +72,7 @@ python -m http.server 8080
 ## License
 
 MIT
+
+## 报告生成
+
+文章原稿位于 `posts/`。修改后运行 `npm ci` 和 `node scripts/generate-data.js`，同时提交原稿与 `js/data.js`。
