@@ -105,7 +105,13 @@
     .content-preview .component-badge, .content-preview .component-placeholder { display:none; }
     .admin-preview-map { height:300px; width:100%; }
     .admin-preview-map svg { width:100%; height:100%; }
-    .admin-preview-flow { min-height:270px; min-width:720px; background-color:#fbfcff; background-image:radial-gradient(#d9e0f5 1px,transparent 1px); background-size:16px 16px; }
+    .admin-preview-map { background:radial-gradient(circle at 50% 45%,#fff 0%,#f7f8fb 72%); border-radius:12px; }
+    .admin-preview-map .markmap-node > circle { fill:#fff; stroke:#9ca8c4; stroke-width:1.5px; }
+    .admin-preview-map .markmap-node text { fill:#354052; font-size:13px; }
+    .admin-preview-map .markmap-link { stroke:#c4ccdb; stroke-width:1.5px; }
+    .admin-preview-flow { min-height:270px; min-width:720px; background-color:#f8f9fc; background-image:radial-gradient(rgba(116,130,160,.18) 1px,transparent 1px); background-size:20px 20px; }
+    .admin-preview-flow .drawflow-node { border:1px solid rgba(87,101,137,.18); border-radius:16px; background:rgba(255,255,255,.96); box-shadow:0 10px 24px rgba(45,55,80,.09); }
+    .admin-preview-flow .drawflow .connection .main-path { stroke:#aab5c9; stroke-width:2px; }
     .content-preview .blog-flow { overflow-x:auto; }
     .html-editor { display:none; flex:1; min-height:420px; resize:none; padding:16px; border:1px solid #ddd; border-radius:8px; font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; color:#334; background:#fbfcff; }
     .html-editor:focus { outline:none; border-color:#7895e8; }
@@ -118,6 +124,71 @@
     .blog-component { border:2px dashed #91a8eb; border-radius:10px; padding:15px; margin:14px 0; background:#f5f7ff; }
     .component-badge { color:#5574cf; font-size:.75rem; font-weight:700; margin-bottom:8px; }
     .component-placeholder { padding:14px; color:#59677e; background:#fff; border-radius:7px; white-space:pre-wrap; }
+
+    /* Writing workspace: scoped to the article editor. */
+    #editorOverlay { background:rgba(24,30,38,.46); backdrop-filter:blur(6px); }
+    #editorOverlay .writing-panel { width:calc(100vw - 40px); max-width:1640px; height:calc(100dvh - 40px); max-height:none; border-radius:16px; background:#f6f7f9; box-shadow:0 32px 90px #15203233; }
+    #editorOverlay .editor-header { flex-shrink:0; padding:14px 24px; background:#fff; border-color:#e7e9ef; }
+    #editorTitle { color:#253043; font-size:15px; letter-spacing:.02em; }
+    #editorOverlay .editor-body { display:flex; flex-direction:column; gap:12px; min-height:0; padding:18px 24px 12px; overflow:auto; }
+    #editorOverlay .article-title-field { margin:0; flex-shrink:0; }
+    .article-title-field label { font-size:11px; color:#8a93a3; }
+    #editorOverlay #editTitle { background:transparent; border:0; border-bottom:1px solid #e0e4eb; border-radius:0; padding:5px 0 12px; font-size:24px; font-weight:650; color:#263246; }
+    .article-settings { flex-shrink:0; border:1px solid #e2e6ed; border-radius:8px; background:#fff; }
+    .article-settings summary { cursor:pointer; padding:10px 14px; font-size:12px; color:#47556a; }
+    .article-settings summary span { color:#8e97a7; margin-left:12px; font-size:11px; }
+    .settings-fields { padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:230px; overflow:auto; }
+    .settings-fields > .form-group { grid-column:1 / -1; }
+    #editorOverlay .settings-fields .form-group { margin:0; }
+    #editorOverlay #editExcerpt { min-height:60px; }
+    #editorOverlay .content-editor-group { flex:1; min-height:0; margin:0; display:flex; flex-direction:column; }
+    .content-editor-heading { flex-shrink:0; padding:0 0 8px; }
+    .content-editor-heading label { font-size:12px; color:#4e5d72; font-weight:600; }
+    .workspace-hint { font-size:11px; font-weight:400; color:#939baa; margin-left:10px; }
+    .mode-switch { background:#e9edf3; }
+    .mode-switch button.active { background:#fff; color:#27364b; box-shadow:0 1px 4px #24324420; }
+    #editorOverlay .editor-workspace { flex:1; min-height:0; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }
+    .editor-pane, .preview-pane { min-height:0; border:1px solid #e1e5ed; border-radius:10px; background:#fff; overflow:hidden; }
+    #editorOverlay .editor-toolbar { flex-shrink:0; min-height:45px; border:0; border-bottom:1px solid #e9edf2; border-radius:0; padding:7px 12px; background:#fff; gap:5px; }
+    .editor-toolbar button { color:#5b687b; border-color:transparent; background:transparent; font-size:12px; }
+    .editor-toolbar button:hover { background:#edf2f8; border-color:transparent; }
+    #editorOverlay .rich-editor { flex:1; min-height:0; max-height:none; border:0; border-radius:0; padding:26px 30px; font-size:15px; line-height:1.9; color:#3d495a; }
+    #editorOverlay .rich-editor:focus { box-shadow:none; }
+    #editorOverlay .html-editor { flex:1; min-height:0; border:0; border-radius:0; padding:22px; color:#3d526d; font-size:13px; }
+    .preview-label { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; height:45px; padding:0 18px; background:#fafbfc; color:#667287; font-size:12px; border-color:#e9edf2; }
+    .preview-label small { color:#a0a8b5; font-size:10px; font-weight:400; }
+    #editorOverlay .content-preview { min-height:0; padding:26px 30px; font-size:15px; line-height:1.9; color:#3d495a; background:#fff; }
+    .rich-editor p, .content-preview p { margin:0 0 16px; }
+    .rich-editor h2, .content-preview h2 { margin:30px 0 14px; font-size:21px; font-weight:650; letter-spacing:-.02em; color:#263246; }
+    .rich-editor h3, .content-preview h3 { margin:24px 0 12px; font-size:17px; color:#34445a; }
+    .rich-editor ul, .rich-editor ol, .content-preview ul, .content-preview ol { padding-left:24px; margin:12px 0 20px; }
+    .rich-editor li, .content-preview li { margin:5px 0; }
+    .content-preview blockquote { margin:20px 0; padding:12px 18px; background:#f4f7fa; border-left:3px solid #b0bed0; border-radius:0 8px 8px 0; }
+    .rich-editor pre, .content-preview pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#f5f7fa; padding:14px; border-radius:8px; font-size:12px; line-height:1.7; }
+    .content-preview table { width:100%; border-collapse:collapse; font-size:12px; }
+    .content-preview th, .content-preview td { padding:10px; border-bottom:1px solid #e5eaf0; text-align:left; }
+    #editorOverlay .editor-tip { margin-top:8px; font-size:11px; flex-shrink:0; color:#949eac; }
+    #editorOverlay .editor-footer { flex-shrink:0; background:#fff; border-color:#e7e9ef; padding:12px 24px; }
+    #saveBtn { background:#334c66; border-radius:7px; padding:9px 26px; }
+    #componentOverlay { z-index:120; }
+    .content-preview .learning-loop, .content-preview .roadmap-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:20px 0; padding:0; }
+    .content-preview .learning-loop > i { display:none; }
+    .content-preview .loop-step, .content-preview .roadmap-grid > div { border:1px solid #e3e8ef; border-radius:10px; padding:14px; background:#fafbfc; }
+    .content-preview .loop-step b, .content-preview .roadmap-grid b, .content-preview .roadmap-grid small { display:block; }
+    .content-preview .loop-step strong { font-size:11px; color:#8798b0; }
+    .content-preview .loop-step span, .content-preview .roadmap-grid span, .content-preview .roadmap-grid small { font-size:12px; color:#7d899a; }
+    .content-preview .blog-component { margin:22px 0; border:1px solid #e1e7ef; border-radius:12px; box-shadow:none; }
+    .content-preview .admin-preview-map { height:360px; }
+    .admin-preview-flow { position:relative; height:300px; min-width:0; width:100%; overflow:hidden; }
+    .admin-preview-flow .drawflow { position:relative; width:100%; height:100%; }
+    .admin-preview-flow .drawflow-node { width:140px; padding:12px; min-height:88px; }
+    .admin-preview-flow .rag-node-card { display:flex; flex-direction:column; gap:6px; text-align:left; }
+    .admin-preview-flow .rag-node-card span { color:#7189a3; font-size:12px; }
+    .admin-preview-flow .rag-node-card b { font-size:13px; color:#35465d; line-height:1.5; }
+    .admin-preview-flow .rag-node-card small { font-size:10px; color:#8793a4; line-height:1.5; }
+    .admin-preview-flow .connection .main-path { stroke:#aab8cb; stroke-width:2px; }
+    .admin-preview-flow .drawflow-node .input, .admin-preview-flow .drawflow-node .output { width:9px; height:9px; background:#94a7c0; border:2px solid #fff; }
+    @media(max-width:900px) { #editorOverlay .writing-panel { width:100%; height:100dvh; border-radius:0; } #editorOverlay .editor-body { padding:12px; } #editorOverlay #editTitle { font-size:19px; } .workspace-hint { display:none; } #editorOverlay .editor-workspace { overflow:auto; grid-template-columns:1fr; min-height:0; } #editorOverlay .editor-pane, #editorOverlay .preview-pane { min-height:430px; } .settings-fields { grid-template-columns:1fr; } .article-settings summary span { display:none; } }
   </style>
 </head>
 <body>
@@ -192,17 +263,18 @@
 
 <!-- Editor -->
 <div id="editorOverlay" class="editor-overlay" onclick="if(event.target===this)closeEditor()">
-  <div class="editor-panel">
+  <div class="editor-panel writing-panel">
     <div class="editor-header">
       <h2 id="editorTitle">新建文章</h2>
       <button class="btn btn-outline btn-sm" onclick="closeEditor()">关闭</button>
     </div>
     <div class="editor-body">
       <input type="hidden" id="editId">
-      <div class="form-group">
-        <label>标题</label>
+      <div class="form-group article-title-field">
+        <label>文章标题</label>
         <input type="text" id="editTitle" placeholder="文章标题">
       </div>
+      <details class="article-settings"><summary>文章设置 <span>摘要、分类、日期、标签与封面</span></summary><div class="settings-fields">
       <div class="form-group">
         <label>摘要</label>
         <textarea id="editExcerpt" rows="2" placeholder="文章摘要，显示在首页卡片上"></textarea>
@@ -227,8 +299,9 @@
           <input type="text" id="editCover" placeholder="https://images.unsplash.com/...">
         </div>
       </div>
+      </div></details>
       <div class="form-group content-editor-group">
-        <div class="content-editor-heading"><label>正文</label><div class="mode-switch"><button type="button" id="visualModeBtn" class="active" onclick="setEditMode('visual')">可视化</button><button type="button" id="htmlModeBtn" onclick="setEditMode('html')">HTML</button></div></div>
+        <div class="content-editor-heading"><label>撰写正文 <span class="workspace-hint">右侧查看阅读效果</span></label><div class="mode-switch"><button type="button" id="visualModeBtn" class="active" onclick="setEditMode('visual')">可视化</button><button type="button" id="htmlModeBtn" onclick="setEditMode('html')">HTML</button></div></div>
         <div class="editor-workspace">
           <div class="editor-pane">
             <div class="editor-toolbar">
@@ -237,7 +310,7 @@
             <div id="richContent" class="rich-editor" contenteditable="true" data-placeholder="在这里直接写正文……"></div>
             <textarea id="editContent" class="html-editor" spellcheck="false" placeholder="在这里编辑 HTML"></textarea>
           </div>
-          <div class="preview-pane"><div class="preview-label">实时预览</div><div id="contentPreview" class="content-preview"></div></div>
+          <div class="preview-pane"><div class="preview-label"><span>阅读预览</span><small>随编辑更新</small></div><div id="contentPreview" class="content-preview"></div></div>
         </div>
         <div class="editor-tip">左侧编辑，右侧实时预览；需要精细调整时切换到 HTML 模式。</div>
       </div>
@@ -458,6 +531,7 @@ function insertVisualComponent() {
     document.execCommand('insertHTML', false, html);
   }
   closeComponentEditor();
+  updateContentPreview();
 }
 
 function updateContentPreview() {
@@ -470,10 +544,10 @@ function renderPreviewComponents(container) {
   container.querySelectorAll('.blog-mindmap').forEach(function(host) {
     if (!window.markmap || !window.markmap.Transformer || !window.markmap.Markmap) return;
     const source = decodeURIComponent(host.getAttribute('data-source') || '');
-    const canvas = document.createElement('div'); canvas.className = 'admin-preview-map';
+    const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); canvas.classList.add('admin-preview-map'); canvas.setAttribute('width', String(Math.max(520, host.clientWidth || 760))); canvas.setAttribute('height', '360');
     host.innerHTML = ''; host.appendChild(canvas);
     const transformed = new window.markmap.Transformer().transform(source);
-    window.markmap.Markmap.create(canvas, { autoFit: true, duration: 150 }, transformed.root);
+    window.markmap.Markmap.create(canvas, { autoFit: true, duration: 0, color: () => '#8397b5', paddingX: 12, spacingVertical: 12 }, transformed.root);
   });
   container.querySelectorAll('.blog-flow').forEach(function(host) {
     if (!window.Drawflow) return;
@@ -483,9 +557,10 @@ function renderPreviewComponents(container) {
     const editor = new window.Drawflow(canvas); editor.start(); editor.editor_mode = 'fixed'; editor.zoom_min = .65; editor.zoom_max = 1.2;
     const ids = nodes.map(function(item, i) { return editor.addNode('preview'+i, 1, 1, 20 + i * 175, 90, 'rag-node', {}, '<div class="rag-node-card"><span>◉</span><b>' + item.title + '</b><small>' + (item.detail || '') + '</small></div>'); });
     ids.slice(1).forEach(function(id, i) { editor.addConnection(ids[i], id, 'output_1', 'input_1'); });
+    editor.zoom_min = .2; editor.zoom = Math.min(1, (canvas.clientWidth - 24) / Math.max(175, nodes.length * 175)); editor.zoom_refresh();
   });
 }
-function setEditMode(mode) { if (mode === 'html') document.getElementById('editContent').value = document.getElementById('richContent').innerHTML; else document.getElementById('richContent').innerHTML = document.getElementById('editContent').value; editMode = mode; document.querySelector('.editor-pane').classList.toggle('html-mode', mode === 'html'); document.getElementById('visualModeBtn').classList.toggle('active', mode === 'visual'); document.getElementById('htmlModeBtn').classList.toggle('active', mode === 'html'); updateContentPreview(); }
+function setEditMode(mode) { if (mode !== editMode && mode === 'html') document.getElementById('editContent').value = document.getElementById('richContent').innerHTML; else if (mode !== editMode) document.getElementById('richContent').innerHTML = document.getElementById('editContent').value; editMode = mode; document.querySelector('.editor-pane').classList.toggle('html-mode', mode === 'html'); document.getElementById('visualModeBtn').classList.toggle('active', mode === 'visual'); document.getElementById('htmlModeBtn').classList.toggle('active', mode === 'html'); updateContentPreview(); }
 
 function formatContent(command, value) {
   document.getElementById('richContent').focus();

@@ -1055,3 +1055,18 @@ ul {
 .component-markmap svg { width:100%; height:100%; }
 .component-drawflow { min-height:360px; min-width:720px; background-color:var(--bg-secondary); background-image:radial-gradient(var(--border-color) 1px,transparent 1px); background-size:18px 18px; }
 @media (max-width:700px) { .component-markmap { height:340px; } .blog-flow { overflow-x:auto; } }
+
+/* Editorial visual language for interactive diagrams */
+.markmap-shell, .drawflow-shell, .blog-component { border-color: rgba(80,92,120,.14); background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(245,247,252,.92)); box-shadow: 0 14px 34px rgba(45,55,80,.07); }
+.markmap { background: radial-gradient(circle at 50% 45%, #fff 0%, #f7f8fb 72%); }
+.markmap .markmap-node > circle { fill: #fff; stroke: #9ca8c4; stroke-width: 1.5px; }
+.markmap .markmap-node text { fill: #354052; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size: 14px; }
+.markmap .markmap-link { stroke: #c4ccdb; stroke-width: 1.5px; }
+.drawflow { background-color: #f8f9fc; background-image: radial-gradient(rgba(116,130,160,.18) 1px, transparent 1px); background-size: 20px 20px; }
+.drawflow .drawflow-node { border: 1px solid rgba(87,101,137,.18); border-radius: 16px; background: rgba(255,255,255,.95); box-shadow: 0 10px 24px rgba(45,55,80,.09); }
+.drawflow .drawflow-node .input, .drawflow .drawflow-node .output { width: 8px; height: 8px; border: 2px solid #fff; background: #9aa8c3; }
+.drawflow .connection .main-path { stroke: #aab5c9; stroke-width: 2px; }
+.rag-node-card { padding: 9px 7px; gap: 3px; color: #354052; }
+.rag-node-card span { filter: grayscale(.25); font-size: 1.15rem; }
+.rag-node-card b { font-size: .9rem; font-weight: 650; }
+.rag-node-card small { color: #8791a5; font-size: .7rem; }
