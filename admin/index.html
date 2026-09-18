@@ -83,6 +83,12 @@
     .rich-editor blockquote { margin:12px 0; padding:8px 14px; border-left:3px solid #7895e8; background:#f5f7ff; color:#666; }
     .rich-editor img { max-width:100%; height:auto; border-radius:8px; }
     .editor-tip { color:#999; font-size:.78rem; margin-top:6px; }
+    .component-panel { max-width: 680px; }
+    .flow-edit-row { display:grid; grid-template-columns:1fr 1fr auto; gap:7px; margin-bottom:8px; }
+    .flow-edit-row input { min-width:0; padding:8px 10px; border:1px solid #ddd; border-radius:6px; }
+    .blog-component { border:2px dashed #91a8eb; border-radius:10px; padding:15px; margin:14px 0; background:#f5f7ff; }
+    .component-badge { color:#5574cf; font-size:.75rem; font-weight:700; margin-bottom:8px; }
+    .component-placeholder { padding:14px; color:#59677e; background:#fff; border-radius:7px; white-space:pre-wrap; }
   </style>
 </head>
 <body>
@@ -136,6 +142,25 @@
   </div>
 </div>
 
+<!-- Visual component editor -->
+<div id="componentOverlay" class="editor-overlay" onclick="if(event.target===this)closeComponentEditor()">
+  <div class="editor-panel component-panel">
+    <div class="editor-header"><h2 id="componentTitle">插入脑图</h2><button class="btn btn-outline btn-sm" onclick="closeComponentEditor()">关闭</button></div>
+    <div class="editor-body">
+      <div id="mindmapComponentForm">
+        <div class="form-group"><label>脑图内容</label><textarea id="mindmapSource" rows="12" placeholder="# 中心主题
+## 第一分支
+### 细节
+## 第二分支"></textarea><div class="editor-tip">每行一个节点，用 # 的层级表示关系。</div></div>
+      </div>
+      <div id="flowComponentForm" style="display:none">
+        <div class="form-group"><label>流程节点</label><div id="flowRows"></div><button type="button" class="btn btn-outline btn-sm" onclick="addFlowRow()">+ 添加节点</button><div class="editor-tip">节点会按填写顺序连接，适合表达学习步骤、产品流程或 RAG。</div></div>
+      </div>
+    </div>
+    <div class="editor-footer"><button class="btn btn-outline" onclick="closeComponentEditor()">取消</button><button class="btn btn-primary" onclick="insertVisualComponent()">插入正文</button></div>
+  </div>
+</div>
+
 <!-- Editor -->
 <div id="editorOverlay" class="editor-overlay" onclick="if(event.target===this)closeEditor()">
   <div class="editor-panel">
@@ -181,6 +206,8 @@
           <button type="button" onclick="formatContent('insertUnorderedList')">列表</button>
           <button type="button" onclick="formatContent('formatBlock','blockquote')">引用</button>
           <button type="button" onclick="insertContentImage()">图片</button>
+          <button type="button" onclick="openComponentEditor('mindmap')">脑图</button>
+          <button type="button" onclick="openComponentEditor('flow')">流程图</button>
         </div>
         <div id="richContent" class="rich-editor" contenteditable="true" data-placeholder="在这里直接写正文……"></div>
         <textarea id="editContent" style="display:none"></textarea>
@@ -359,6 +386,39 @@ function openEditor(id) {
 
 function closeEditor() {
   document.getElementById('editorOverlay').classList.remove('active');
+}
+
+let componentType = 'mindmap';
+function openComponentEditor(type) {
+  componentType = type;
+  document.getElementById('componentOverlay').classList.add('active');
+  document.getElementById('componentTitle').textContent = type === 'mindmap' ? '插入脑图' : '插入流程图';
+  document.getElementById('mindmapComponentForm').style.display = type === 'mindmap' ? 'block' : 'none';
+  document.getElementById('flowComponentForm').style.display = type === 'flow' ? 'block' : 'none';
+  if (type === 'mindmap') document.getElementById('mindmapSource').value = '# 我的主题\n## 第一部分\n### 具体内容\n## 第二部分';
+  else { document.getElementById('flowRows').innerHTML = ''; addFlowRow('开始', ''); addFlowRow('处理', ''); addFlowRow('完成', ''); }
+}
+function closeComponentEditor() { document.getElementById('componentOverlay').classList.remove('active'); }
+function addFlowRow(title, detail) {
+  const row = document.createElement('div'); row.className = 'flow-edit-row';
+  row.innerHTML = '<input class="flow-title" placeholder="节点名称" value="' + escHtml(title || '') + '"><input class="flow-detail" placeholder="补充说明（可选）" value="' + escHtml(detail || '') + '"><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">删除</button>';
+  document.getElementById('flowRows').appendChild(row);
+}
+function attrValue(value) { return encodeURIComponent(String(value || '')); }
+function insertVisualComponent() {
+  let html = '';
+  if (componentType === 'mindmap') {
+    const source = document.getElementById('mindmapSource').value.trim();
+    if (!source) { showToast('请填写脑图内容', 'error'); return; }
+    html = '<div class="blog-component blog-mindmap" contenteditable="false" data-source="' + attrValue(source) + '"><div class="component-badge">交互脑图 · 点击文章后查看</div><div class="component-placeholder">' + escHtml(source.split('\n')[0].replace(/^#+\s*/, '')) + '</div></div><p><br></p>';
+  } else {
+    const nodes = Array.from(document.querySelectorAll('#flowRows .flow-edit-row')).map(function(row) { return { title: row.querySelector('.flow-title').value.trim(), detail: row.querySelector('.flow-detail').value.trim() }; }).filter(function(n) { return n.title; });
+    if (nodes.length < 2) { showToast('流程图至少需要两个节点', 'error'); return; }
+    html = '<div class="blog-component blog-flow" contenteditable="false" data-nodes="' + attrValue(JSON.stringify(nodes)) + '"><div class="component-badge">交互流程图 · 点击文章后查看</div><div class="component-placeholder">' + escHtml(nodes.map(function(n) { return n.title; }).join(' → ')) + '</div></div><p><br></p>';
+  }
+  document.getElementById('richContent').focus();
+  document.execCommand('insertHTML', false, html);
+  closeComponentEditor();
 }
 
 function formatContent(command, value) {

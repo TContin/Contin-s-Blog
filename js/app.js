@@ -375,6 +375,27 @@ function renderInteractiveNotes(container) {
     editor.addConnection(query, store, 'output_1', 'input_1');
     editor.addConnection(store, answer, 'output_1', 'input_1');
   }
+
+  container.querySelectorAll('.blog-mindmap').forEach(function(host) {
+    if (host.__ready || !window.markmap || !window.markmap.Transformer || !window.markmap.Markmap) return;
+    host.__ready = true;
+    var source = decodeURIComponent(host.getAttribute('data-source') || '');
+    var canvas = document.createElement('div'); canvas.className = 'markmap component-markmap';
+    host.innerHTML = ''; host.appendChild(canvas);
+    var transformed = new window.markmap.Transformer().transform(source);
+    window.markmap.Markmap.create(canvas, { autoFit: true, duration: 300 }, transformed.root);
+  });
+
+  container.querySelectorAll('.blog-flow').forEach(function(host) {
+    if (host.__ready || !window.Drawflow) return;
+    host.__ready = true;
+    var nodes; try { nodes = JSON.parse(decodeURIComponent(host.getAttribute('data-nodes') || '[]')); } catch (_) { nodes = []; }
+    var canvas = document.createElement('div'); canvas.className = 'drawflow component-drawflow';
+    host.innerHTML = ''; host.appendChild(canvas);
+    var editor = new window.Drawflow(canvas); editor.start(); editor.editor_mode = 'fixed'; editor.zoom_min = .65; editor.zoom_max = 1.25;
+    var ids = nodes.map(function(item, i) { return editor.addNode('step'+i, 1, 1, 30 + i * 205, 100, 'rag-node', {}, '<div class="rag-node-card"><span>◉</span><b>' + item.title + '</b><small>' + (item.detail || '') + '</small></div>'); });
+    ids.slice(1).forEach(function(id, i) { editor.addConnection(ids[i], id, 'output_1', 'input_1'); });
+  });
 }
 
 // ============================================
