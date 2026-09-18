@@ -96,7 +96,8 @@ function writePosts(posts) {
     js += `    category: ${JSON.stringify(post.category)},\n`;
     js += `    tags: ${JSON.stringify(post.tags)},\n`;
     js += `    cover: ${JSON.stringify(post.cover)},\n`;
-    js += '    content: `\n' + post.content + '\n    `\n';
+    const safeContent = String(post.content || '').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+    js += '    content: `\n' + safeContent + '\n    `\n';
     js += '  }' + (i < posts.length - 1 ? ',' : '') + '\n';
   });
   js += '];\n\n';
