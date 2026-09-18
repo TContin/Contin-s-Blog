@@ -313,6 +313,7 @@ function renderArticle() {
       window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default' });
       window.mermaid.run({ nodes: Array.from(text.querySelectorAll('.mermaid')) });
     }
+    renderInteractiveNotes(text);
   }
   if (tags) tags.innerHTML = post.tags.map(function(t) { return '<span class="article-tag"># ' + t + '</span>'; }).join('');
 
@@ -323,6 +324,38 @@ function renderArticle() {
     else h += '<span></span>';
     if (idx < posts.length - 1) h += '<a href="post.html?id=' + posts[idx+1].id + '">' + posts[idx+1].title + ' <i class="fas fa-arrow-right"></i></a>';
     nav.innerHTML = h;
+  }
+}
+
+function renderInteractiveNotes(container) {
+  var mapEl = container.querySelector('#ai-learning-map');
+  if (mapEl && window.markmap && window.markmap.Transformer && window.markmap.Markmap) {
+    var source = mapEl.querySelector('script[type="text/template"]');
+    var transformer = new window.markmap.Transformer();
+    var transformed = transformer.transform(source ? source.textContent : '');
+    window.markmap.Markmap.create(mapEl, { autoFit: true, duration: 300 }, transformed.root);
+  }
+
+  var flowEl = container.querySelector('#rag-flow-editor');
+  if (flowEl && window.Drawflow && !flowEl.__ready) {
+    flowEl.__ready = true;
+    var editor = new window.Drawflow(flowEl);
+    editor.start();
+    editor.editor_mode = 'fixed';
+    editor.zoom_min = 0.65;
+    editor.zoom_max = 1.25;
+    var node = function(name, title, detail, icon, x, y) {
+      return editor.addNode(name, 1, 1, x, y, 'rag-node', {}, '<div class="rag-node-card"><span>' + icon + '</span><b>' + title + '</b><small>' + detail + '</small></div>');
+    };
+    var docs = node('docs', '我的文档', 'PDF / 笔记 / 技术资料', '📚', 28, 110);
+    var embed = node('embed', '切分 + 向量化', 'Embedding', '✂️', 245, 110);
+    var store = node('store', '向量库', '可检索的资料片段', '🗂️', 475, 110);
+    var query = node('query', '我的问题', '先提出问题', '💬', 245, 270);
+    var answer = node('answer', '回答 + 引用', '根据资料作答', '✨', 705, 110);
+    editor.addConnection(docs, embed, 'output_1', 'input_1');
+    editor.addConnection(embed, store, 'output_1', 'input_1');
+    editor.addConnection(query, store, 'output_1', 'input_1');
+    editor.addConnection(store, answer, 'output_1', 'input_1');
   }
 }
 

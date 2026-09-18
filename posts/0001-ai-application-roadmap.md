@@ -26,14 +26,28 @@ excerpt: 不靠堆课程，从 Python 开始，用六个月走完理解原理、
 
 ### 我对大模型的脑内地图
 
-<div class="note-map">
-  <div class="note-map-core">大模型应用<br><small>我最终要做出来的东西</small></div>
-  <div class="note-map-branches">
-    <div class="note-branch"><b>原理</b><span>Token · Transformer · Attention · 训练对齐</span></div>
-    <div class="note-branch"><b>应用</b><span>Prompt · RAG · 工具调用 · Agent</span></div>
-    <div class="note-branch"><b>工程</b><span>API · 数据库 · Docker · 评估监控</span></div>
-    <div class="note-branch"><b>作品</b><span>知识库 · 学习助手 · 游戏工具</span></div>
-  </div>
+<div class="markmap-shell">
+  <div class="visual-label"><span>INTERACTIVE MAP</span><b>拖动、缩放、点击节点展开</b></div>
+  <div class="markmap" id="ai-learning-map"><script type="text/template"># 大模型应用
+## 原理
+### Token
+### Transformer
+### Attention
+### 训练与对齐
+## 应用
+### Prompt
+### RAG
+### 工具调用
+### Agent
+## 工程
+### API
+### 数据库
+### Docker
+### 评估与监控
+## 作品
+### 知识库
+### 学习助手
+### 游戏工具</script></div>
 </div>
 
 我不用一开始就把所有数学细节吃透，但要知道自己调用的东西大概是怎么来的。这样遇到回答不准、知识过时或成本太高时，我才知道应该改数据、改检索、改提示词，还是换模型。
@@ -128,12 +142,10 @@ RAG 是个人和小团队最实用的方向之一。它的思路不是把所有�
 
 我把 RAG 理解成“先翻资料，再回答问题”，而不是让模型凭记忆硬答：
 
-<div class="rag-flow">
-  <div class="rag-column"><span class="rag-icon">📚</span><b>我的文档</b><small>PDF、笔记、技术资料</small></div><em>→</em>
-  <div class="rag-column"><span class="rag-icon">✂️</span><b>切分 + 向量化</b><small>Embedding</small></div><em>→</em>
-  <div class="rag-column"><span class="rag-icon">🗂️</span><b>向量库</b><small>保存可检索的片段</small></div>
-  <div class="rag-query">我的问题 ↓</div>
-  <div class="rag-answer"><b>检索相关内容 → 模型回答 → 引用来源</b><small>先翻资料，再回答问题，减少凭空编造</small></div>
+<div class="drawflow-shell">
+  <div class="visual-label"><span>INTERACTIVE FLOW</span><b>可以拖动画布，滚轮缩放流程</b></div>
+  <div id="rag-flow-editor" class="drawflow"></div>
+  <div class="flow-caption">我的问题进入检索流程，模型只根据找到的资料回答，并把来源带回来。</div>
 </div>
 
 ```text

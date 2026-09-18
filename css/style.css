@@ -1030,3 +1030,21 @@ ul {
   .rag-flow { grid-template-columns:1fr; }
   .rag-query, .rag-answer { grid-column:1; }
 }
+
+/* Interactive diagram components */
+.markmap-shell, .drawflow-shell { margin: 28px 0; border: 1px solid var(--border-color); border-radius: 18px; overflow: hidden; background: var(--bg-secondary); }
+.visual-label { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border-color); font-size:.8rem; }
+.visual-label span { color:var(--accent); letter-spacing:.12em; font-weight:800; }
+.visual-label b { color:var(--text-muted); font-weight:500; }
+.markmap { height: 440px; width:100%; background: radial-gradient(circle at center, var(--bg-primary), var(--bg-secondary)); }
+.markmap svg { width:100%; height:100%; }
+.drawflow-shell { overflow:hidden; }
+.drawflow { min-height:410px; width:100%; background-color:var(--bg-secondary); background-image:radial-gradient(var(--border-color) 1px, transparent 1px); background-size:18px 18px; }
+.drawflow .drawflow-node { width:155px; min-height:72px; border:1px solid var(--border-color); border-radius:14px; background:var(--bg-primary); box-shadow:0 8px 22px rgba(0,0,0,.08); }
+.drawflow .drawflow-node .input, .drawflow .drawflow-node .output { width:12px; height:12px; background:var(--accent); border:2px solid var(--bg-primary); }
+.rag-node-card { display:flex; flex-direction:column; gap:4px; text-align:center; padding:5px; }
+.rag-node-card span { font-size:1.3rem; }
+.rag-node-card b { color:var(--text-primary); }
+.rag-node-card small { color:var(--text-muted); font-size:.72rem; }
+.flow-caption { padding:13px 16px; color:var(--text-muted); font-size:.86rem; border-top:1px solid var(--border-color); }
+@media (max-width:700px) { .markmap { height:360px; } .drawflow { min-width:900px; } .drawflow-shell { overflow-x:auto; } .visual-label { min-width:900px; } }
