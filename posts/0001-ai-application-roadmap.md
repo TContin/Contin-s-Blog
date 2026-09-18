@@ -26,29 +26,15 @@ excerpt: 不靠堆课程，从 Python 开始，用六个月走完理解原理、
 
 ### 我对大模型的脑内地图
 
-```mermaid
-mindmap
-  root((大模型应用))
-    原理
-      Token
-      Transformer
-      Attention
-      训练与对齐
-    应用
-      Prompt
-      RAG
-      工具调用
-      Agent
-    工程
-      API
-      数据库
-      Docker
-      评估与监控
-    作品
-      知识库
-      学习助手
-      游戏工具
-```
+<div class="note-map">
+  <div class="note-map-core">大模型应用<br><small>我最终要做出来的东西</small></div>
+  <div class="note-map-branches">
+    <div class="note-branch"><b>原理</b><span>Token · Transformer · Attention · 训练对齐</span></div>
+    <div class="note-branch"><b>应用</b><span>Prompt · RAG · 工具调用 · Agent</span></div>
+    <div class="note-branch"><b>工程</b><span>API · 数据库 · Docker · 评估监控</span></div>
+    <div class="note-branch"><b>作品</b><span>知识库 · 学习助手 · 游戏工具</span></div>
+  </div>
+</div>
 
 我不用一开始就把所有数学细节吃透，但要知道自己调用的东西大概是怎么来的。这样遇到回答不准、知识过时或成本太高时，我才知道应该改数据、改检索、改提示词，还是换模型。
 
@@ -58,15 +44,13 @@ mindmap
 
 > 学一个概念 → 手写一个小例子 → 调用真实模型 → 做一个小项目 → 写 README → 复盘问题
 
-```mermaid
-flowchart LR
-  A[学概念] --> B[写最小例子]
-  B --> C[接入真实模型]
-  C --> D[做一个能用的小项目]
-  D --> E[测试和记录失败]
-  E --> F[写 README 复盘]
-  F --> A
-```
+<div class="learning-loop">
+  <div class="loop-step"><strong>01</strong><b>学概念</b><span>先搞懂它解决什么问题</span></div><i>→</i>
+  <div class="loop-step"><strong>02</strong><b>写例子</b><span>用最小代码跑通</span></div><i>→</i>
+  <div class="loop-step"><strong>03</strong><b>接模型</b><span>连接真实输入输出</span></div><i>→</i>
+  <div class="loop-step"><strong>04</strong><b>做项目</b><span>做成自己会用的工具</span></div><i>→</i>
+  <div class="loop-step"><strong>05</strong><b>复盘</b><span>记录失败，再回到 01</span></div>
+</div>
 
 我不把“看完多少视频”当成进度。对我更有用的标准是：
 
@@ -144,16 +128,13 @@ RAG 是个人和小团队最实用的方向之一。它的思路不是把所有�
 
 我把 RAG 理解成“先翻资料，再回答问题”，而不是让模型凭记忆硬答：
 
-```mermaid
-flowchart TD
-  A[我的文档] --> B[切成小段]
-  B --> C[Embedding 向量化]
-  C --> D[(向量库)]
-  E[我的问题] --> F[检索相关片段]
-  D --> F
-  F --> G[模型结合资料回答]
-  G --> H[附上引用来源]
-```
+<div class="rag-flow">
+  <div class="rag-column"><span class="rag-icon">📚</span><b>我的文档</b><small>PDF、笔记、技术资料</small></div><em>→</em>
+  <div class="rag-column"><span class="rag-icon">✂️</span><b>切分 + 向量化</b><small>Embedding</small></div><em>→</em>
+  <div class="rag-column"><span class="rag-icon">🗂️</span><b>向量库</b><small>保存可检索的片段</small></div>
+  <div class="rag-query">我的问题 ↓</div>
+  <div class="rag-answer"><b>检索相关内容 → 模型回答 → 引用来源</b><small>先翻资料，再回答问题，减少凭空编造</small></div>
+</div>
 
 ```text
 文档 → 切分 → 向量化 → 向量数据库
@@ -204,6 +185,17 @@ flowchart TD
 最后我想完成一个综合项目，例如“个人 AI 学习助手”：支持上传 PDF、自动总结、知识问答、生成错题、引用原文并保存对话记录。这个项目会同时练到前端、后端、模型调用、RAG、数据库和部署。
 
 ## 六个月可以这样安排
+
+我把六个月拆成六个台阶，每一级都要留下一个看得见的作品：
+
+<div class="roadmap-grid">
+  <div><b>01 · 基础</b><span>Python、数学、机器学习</span><small>留下 3 个传统项目</small></div>
+  <div><b>02 · 训练</b><span>PyTorch、神经网络</span><small>图像和文本分类</small></div>
+  <div><b>03 · 原理</b><span>Transformer、Tokenizer</span><small>一个迷你 GPT</small></div>
+  <div><b>04 · 应用</b><span>开源模型、Prompt、RAG</span><small>PDF 知识库</small></div>
+  <div><b>05 · 调整</b><span>LoRA、QLoRA、数据</span><small>微调一个小模型</small></div>
+  <div><b>06 · 上线</b><span>Agent、部署、包装</span><small>完整 AI 应用</small></div>
+</div>
 
 | 时间 | 学什么 | 应该留下什么 |
 | --- | --- | --- |
