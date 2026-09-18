@@ -11,6 +11,8 @@ const CONFIG = {
   password: 'k96017..',           // 管理后台密码
   blogDir: '/var/www/blog',      // 博客目录
   dataFile: '/var/www/blog/js/data.js',
+  settingsFile: '/var/www/blog/js/site-config.js',
+  assetsDir: '/var/www/blog/img',
 };
 
 // ============================================
@@ -63,6 +65,24 @@ function readPosts() {
     console.error('读取文章失败:', e.message);
     return [];
   }
+}
+
+function defaultSettings() {
+  return { siteName: "Contin's Blog", authorName: 'Contin', tagline: '代码能跑就行', intro: '记录代码、AI 和生活里的小想法。', avatar: 'img/AvatarIcon.jpg' };
+}
+
+function readSettings() {
+  try {
+    const content = fs.readFileSync(CONFIG.settingsFile, 'utf-8');
+    const fn = new Function(content + '\nreturn siteConfig;');
+    return { ...defaultSettings(), ...(fn() || {}) };
+  } catch { return defaultSettings(); }
+}
+
+function writeSettings(settings) {
+  const safe = { ...defaultSettings(), ...settings };
+  fs.writeFileSync(CONFIG.settingsFile, '// AUTO-GENERATED site settings\nconst siteConfig = ' + JSON.stringify(safe, null, 2) + ';\n', 'utf-8');
+  return safe;
 }
 
 function writePosts(posts) {
@@ -153,6 +173,36 @@ const server = http.createServer(async (req, res) => {
       jsonResponse(res, 401, { success: false, message: '未登录' });
       return;
     }
+  }
+
+  // --- 站点设置 ---
+  if (pathname === '/admin/api/settings' && req.method === 'GET') {
+    jsonResponse(res, 200, { success: true, settings: readSettings() });
+    return;
+  }
+  if (pathname === '/admin/api/settings' && req.method === 'PUT') {
+    const body = JSON.parse(await readBody(req));
+    const settings = writeSettings(body);
+    const git = gitPush('更新站点设置');
+    jsonResponse(res, 200, { success: true, settings, git });
+    return;
+  }
+
+  // --- 图片上传（JSON data URL，限制 5MB） ---
+  if (pathname === '/admin/api/upload' && req.method === 'POST') {
+    const body = JSON.parse(await readBody(req));
+    const match = String(body.data || '').match(/^data:image\/(png|jpe?g|gif|webp);base64,([A-Za-z0-9+/=]+)$/i);
+    if (!match) { jsonResponse(res, 400, { success: false, message: '只支持 PNG、JPG、GIF、WebP 图片' }); return; }
+    const buffer = Buffer.from(match[2], 'base64');
+    if (buffer.length > 5 * 1024 * 1024) { jsonResponse(res, 413, { success: false, message: '图片不能超过 5MB' }); return; }
+    fs.mkdirSync(CONFIG.assetsDir, { recursive: true });
+    const ext = match[1].toLowerCase().replace('jpeg', 'jpg');
+    const filename = 'admin-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    fs.writeFileSync(path.join(CONFIG.assetsDir, filename), buffer);
+    const url = 'img/' + filename;
+    const git = gitPush('上传站点图片');
+    jsonResponse(res, 200, { success: true, url, git });
+    return;
   }
 
   // --- 获取文章列表 ---

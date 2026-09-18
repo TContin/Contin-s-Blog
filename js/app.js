@@ -1,4 +1,22 @@
 // ============================================
+// Site configuration
+// ============================================
+(function applySiteConfig() {
+  var c = window.siteConfig || {};
+  var name = c.siteName || "Contin's Blog";
+  var author = c.authorName || 'Contin';
+  var tagline = c.tagline || '';
+  var intro = c.intro || '';
+  document.title = document.title.replace(/Contin's Blog/g, name);
+  document.querySelectorAll('.nav-logo span').forEach(function(el) { el.textContent = name; });
+  document.querySelectorAll('.profile-name').forEach(function(el) { el.textContent = author; });
+  document.querySelectorAll('.profile-bio, .intro-signature').forEach(function(el) { el.textContent = tagline; });
+  document.querySelectorAll('.intro-hint').forEach(function(el) { if (intro) el.textContent = intro; });
+  document.querySelectorAll('.nav-logo img, .profile-avatar img, .intro-avatar').forEach(function(el) { if (c.avatar) el.src = c.avatar; });
+  document.querySelectorAll('.footer p').forEach(function(el) { el.innerHTML = '&copy; ' + new Date().getFullYear() + ' ' + name + '. Powered with <i class="fas fa-heart" style="color:#e74c3c"></i> and curiosity.'; });
+})();
+
+// ============================================
 // Theme Toggle
 // ============================================
 (function() {

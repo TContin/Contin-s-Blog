@@ -52,6 +52,7 @@
     /* Editor */
     .editor-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; }
     .editor-overlay.active { display: flex; align-items: center; justify-content: center; }
+    .settings-panel { max-width: 620px; }
     .editor-panel { background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; }
     .editor-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
     .editor-header h2 { font-size: 1.05rem; color: #555; }
@@ -93,6 +94,7 @@
   <div class="admin-header">
     <h1>Contin's Blog 管理后台</h1>
     <div class="actions">
+      <button class="btn btn-outline btn-sm" onclick="openSettings()">站点设置</button>
       <button class="btn btn-outline btn-sm" onclick="window.open('/', '_blank')">查看博客</button>
       <button class="btn btn-outline btn-sm" onclick="doLogout()">退出</button>
     </div>
@@ -105,6 +107,21 @@
     </div>
 
     <div id="postList"></div>
+  </div>
+</div>
+
+<!-- Site settings -->
+<div id="settingsOverlay" class="editor-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="editor-panel settings-panel">
+    <div class="editor-header"><h2>站点设置</h2><button class="btn btn-outline btn-sm" onclick="closeSettings()">关闭</button></div>
+    <div class="editor-body">
+      <div class="form-group"><label>博客名称</label><input id="siteName" placeholder="例如：Contin's Blog"></div>
+      <div class="form-group"><label>作者名称</label><input id="authorName" placeholder="显示在个人卡片"></div>
+      <div class="form-group"><label>一句话签名</label><input id="siteTagline" placeholder="例如：代码能跑就行"></div>
+      <div class="form-group"><label>首页介绍</label><textarea id="siteIntro" rows="3" placeholder="首页欢迎语"></textarea></div>
+      <div class="form-group"><label>头像 / 图片</label><input type="file" id="siteImage" accept="image/png,image/jpeg,image/gif,image/webp" onchange="uploadSiteImage()"><input id="siteAvatar" placeholder="图片地址" style="margin-top:8px"><div id="imageStatus" class="post-meta-cell" style="margin-top:6px"></div></div>
+    </div>
+    <div class="editor-footer"><button class="btn btn-outline" onclick="closeSettings()">取消</button><button class="btn btn-primary" onclick="saveSettings()">保存设置</button></div>
   </div>
 </div>
 
@@ -189,6 +206,7 @@ async function doLogin() {
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('adminView').style.display = 'block';
     loadPosts();
+    loadSettings();
   } else {
     document.getElementById('loginError').textContent = data.message || '密码错误';
   }
@@ -209,6 +227,43 @@ async function checkAuth() {
       loadPosts();
     }
   } catch (e) {}
+}
+
+// ============================================
+// Site settings
+// ============================================
+async function loadSettings() {
+  const res = await fetch(API + '/settings');
+  const data = await res.json();
+  if (!data.settings) return;
+  document.getElementById('siteName').value = data.settings.siteName || '';
+  document.getElementById('authorName').value = data.settings.authorName || '';
+  document.getElementById('siteTagline').value = data.settings.tagline || '';
+  document.getElementById('siteIntro').value = data.settings.intro || '';
+  document.getElementById('siteAvatar').value = data.settings.avatar || '';
+}
+function openSettings() { document.getElementById('settingsOverlay').classList.add('active'); loadSettings(); }
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
+async function saveSettings() {
+  const body = { siteName: document.getElementById('siteName').value.trim(), authorName: document.getElementById('authorName').value.trim(), tagline: document.getElementById('siteTagline').value.trim(), intro: document.getElementById('siteIntro').value.trim(), avatar: document.getElementById('siteAvatar').value.trim() };
+  const res = await fetch(API + '/settings', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (data.success) { showToast('站点设置已保存，部署完成后生效', 'success'); closeSettings(); }
+  else showToast(data.message || '保存失败', 'error');
+}
+async function uploadSiteImage() {
+  const file = document.getElementById('siteImage').files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('图片不能超过 5MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = async function() {
+    document.getElementById('imageStatus').textContent = '正在上传…';
+    const res = await fetch(API + '/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:reader.result}) });
+    const data = await res.json();
+    if (data.success) { document.getElementById('siteAvatar').value = data.url; document.getElementById('imageStatus').textContent = '上传成功，点击保存设置'; }
+    else { document.getElementById('imageStatus').textContent = data.message || '上传失败'; }
+  };
+  reader.readAsDataURL(file);
 }
 
 // ============================================
