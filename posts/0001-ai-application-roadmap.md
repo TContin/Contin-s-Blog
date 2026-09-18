@@ -26,29 +26,7 @@ excerpt: 不靠堆课程，从 Python 开始，用六个月走完理解原理、
 
 ### 我对大模型的脑内地图
 
-<div class="markmap-shell">
-  <div class="visual-label"><span>INTERACTIVE MAP</span><b>拖动、缩放、点击节点展开</b></div>
-  <div class="markmap" id="ai-learning-map"><script type="text/template"># 大模型应用
-## 原理
-### Token
-### Transformer
-### Attention
-### 训练与对齐
-## 应用
-### Prompt
-### RAG
-### 工具调用
-### Agent
-## 工程
-### API
-### 数据库
-### Docker
-### 评估与监控
-## 作品
-### 知识库
-### 学习助手
-### 游戏工具</script></div>
-</div>
+<div class="blog-component blog-mindmap" contenteditable="false" data-source="%23%20%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BA%94%E7%94%A8%0A%23%23%20%E5%8E%9F%E7%90%86%0A%23%23%23%20Token%0A%23%23%23%20Transformer%0A%23%23%23%20Attention%0A%23%23%23%20%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%AF%B9%E9%BD%90%0A%23%23%20%E5%BA%94%E7%94%A8%0A%23%23%23%20Prompt%0A%23%23%23%20RAG%0A%23%23%23%20%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%0A%23%23%23%20Agent%0A%23%23%20%E5%B7%A5%E7%A8%8B%0A%23%23%23%20API%0A%23%23%23%20%E6%95%B0%E6%8D%AE%E5%BA%93%0A%23%23%23%20Docker%0A%23%23%23%20%E8%AF%84%E4%BC%B0%E4%B8%8E%E7%9B%91%E6%8E%A7%0A%23%23%20%E4%BD%9C%E5%93%81%0A%23%23%23%20%E7%9F%A5%E8%AF%86%E5%BA%93%0A%23%23%23%20%E5%AD%A6%E4%B9%A0%E5%8A%A9%E6%89%8B%0A%23%23%23%20%E6%B8%B8%E6%88%8F%E5%B7%A5%E5%85%B7"><div class="component-badge">交互脑图 · 双击可编辑</div><div class="component-placeholder">大模型应用</div></div>
 
 我不用一开始就把所有数学细节吃透，但要知道自己调用的东西大概是怎么来的。这样遇到回答不准、知识过时或成本太高时，我才知道应该改数据、改检索、改提示词，还是换模型。
 
@@ -142,11 +120,7 @@ RAG 是个人和小团队最实用的方向之一。它的思路不是把所有�
 
 我把 RAG 理解成“先翻资料，再回答问题”，而不是让模型凭记忆硬答：
 
-<div class="drawflow-shell">
-  <div class="visual-label"><span>INTERACTIVE FLOW</span><b>可以拖动画布，滚轮缩放流程</b></div>
-  <div id="rag-flow-editor" class="drawflow"></div>
-  <div class="flow-caption">我的问题进入检索流程，模型只根据找到的资料回答，并把来源带回来。</div>
-</div>
+<div class="blog-component blog-flow" contenteditable="false" data-nodes="%5B%7B%22title%22%3A%20%22%E6%88%91%E7%9A%84%E6%96%87%E6%A1%A3%22%2C%20%22detail%22%3A%20%22PDF%20%2F%20%E7%AC%94%E8%AE%B0%20%2F%20%E6%8A%80%E6%9C%AF%E8%B5%84%E6%96%99%22%7D%2C%20%7B%22title%22%3A%20%22%E5%88%87%E5%88%86%20%2B%20%E5%90%91%E9%87%8F%E5%8C%96%22%2C%20%22detail%22%3A%20%22Embedding%22%7D%2C%20%7B%22title%22%3A%20%22%E5%90%91%E9%87%8F%E5%BA%93%22%2C%20%22detail%22%3A%20%22%E5%8F%AF%E6%A3%80%E7%B4%A2%E7%9A%84%E8%B5%84%E6%96%99%E7%89%87%E6%AE%B5%22%7D%2C%20%7B%22title%22%3A%20%22%E6%88%91%E7%9A%84%E9%97%AE%E9%A2%98%22%2C%20%22detail%22%3A%20%22%E5%85%88%E6%8F%90%E5%87%BA%E9%97%AE%E9%A2%98%22%7D%2C%20%7B%22title%22%3A%20%22%E5%9B%9E%E7%AD%94%20%2B%20%E5%BC%95%E7%94%A8%22%2C%20%22detail%22%3A%20%22%E6%A0%B9%E6%8D%AE%E8%B5%84%E6%96%99%E4%BD%9C%E7%AD%94%22%7D%5D"><div class="component-badge">交互流程图 · 双击可编辑</div><div class="component-placeholder">我的文档 → 切分 + 向量化 → 向量库 → 我的问题 → 回答 + 引用</div></div>
 
 ```text
 文档 → 切分 → 向量化 → 向量数据库

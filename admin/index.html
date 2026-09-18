@@ -389,14 +389,16 @@ function closeEditor() {
 }
 
 let componentType = 'mindmap';
-function openComponentEditor(type) {
+let componentEditing = null;
+function openComponentEditor(type, existing) {
   componentType = type;
+  componentEditing = existing || null;
   document.getElementById('componentOverlay').classList.add('active');
   document.getElementById('componentTitle').textContent = type === 'mindmap' ? '插入脑图' : '插入流程图';
   document.getElementById('mindmapComponentForm').style.display = type === 'mindmap' ? 'block' : 'none';
   document.getElementById('flowComponentForm').style.display = type === 'flow' ? 'block' : 'none';
-  if (type === 'mindmap') document.getElementById('mindmapSource').value = '# 我的主题\n## 第一部分\n### 具体内容\n## 第二部分';
-  else { document.getElementById('flowRows').innerHTML = ''; addFlowRow('开始', ''); addFlowRow('处理', ''); addFlowRow('完成', ''); }
+  if (type === 'mindmap') document.getElementById('mindmapSource').value = existing ? decodeURIComponent(existing.getAttribute('data-source') || '') : '# 我的主题\n## 第一部分\n### 具体内容\n## 第二部分';
+  else { document.getElementById('flowRows').innerHTML = ''; var values = []; if (existing) { try { values = JSON.parse(decodeURIComponent(existing.getAttribute('data-nodes') || '[]')); } catch (_) {} } (values.length ? values : [{title:'开始',detail:''},{title:'处理',detail:''},{title:'完成',detail:''}]).forEach(function(n) { addFlowRow(n.title, n.detail); }); }
 }
 function closeComponentEditor() { document.getElementById('componentOverlay').classList.remove('active'); }
 function addFlowRow(title, detail) {
@@ -405,6 +407,7 @@ function addFlowRow(title, detail) {
   document.getElementById('flowRows').appendChild(row);
 }
 function attrValue(value) { return encodeURIComponent(String(value || '')); }
+function editVisualComponent(host) { openComponentEditor(host.classList.contains('blog-flow') ? 'flow' : 'mindmap', host); }
 function insertVisualComponent() {
   let html = '';
   if (componentType === 'mindmap') {
@@ -416,8 +419,13 @@ function insertVisualComponent() {
     if (nodes.length < 2) { showToast('流程图至少需要两个节点', 'error'); return; }
     html = '<div class="blog-component blog-flow" contenteditable="false" data-nodes="' + attrValue(JSON.stringify(nodes)) + '"><div class="component-badge">交互流程图 · 点击文章后查看</div><div class="component-placeholder">' + escHtml(nodes.map(function(n) { return n.title; }).join(' → ')) + '</div></div><p><br></p>';
   }
-  document.getElementById('richContent').focus();
-  document.execCommand('insertHTML', false, html);
+  if (componentEditing) {
+    componentEditing.outerHTML = html;
+    componentEditing = null;
+  } else {
+    document.getElementById('richContent').focus();
+    document.execCommand('insertHTML', false, html);
+  }
   closeComponentEditor();
 }
 
@@ -499,6 +507,12 @@ async function deletePost(id) {
     showToast('网络错误', 'error');
   }
 }
+
+// Enable double-click editing for visual components.
+document.getElementById('richContent').addEventListener('dblclick', function(event) {
+  const host = event.target.closest('.blog-component');
+  if (host) editVisualComponent(host);
+});
 
 // Init
 checkAuth();
