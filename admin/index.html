@@ -118,7 +118,30 @@
     .editor-pane.html-mode .editor-toolbar, .editor-pane.html-mode .rich-editor { display:none; }
     .editor-pane.html-mode .html-editor { display:block; }
     @media (max-width:900px) { .editor-workspace { grid-template-columns:1fr; } .preview-pane { min-height:300px; } .editor-panel { width:96vw; } }
-    .component-panel { max-width: 680px; }
+    .component-panel { width:min(1120px,94vw); max-width:none; }
+    .component-workspace { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(420px,1.1fr); gap:16px; min-height:480px; }
+    .component-editor-card, .component-preview-card { min-width:0; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden; background:#fff; }
+    .component-card-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px; border-bottom:1px solid #e9edf2; background:#f7f8fa; }
+    .component-card-head strong { color:#39465a; font-size:.86rem; }
+    .component-card-head span { color:#9aa5b5; font-size:.75rem; }
+    .component-editor-card .form-group { padding:14px 14px 0; margin:0; }
+    .component-editor-card textarea { min-height:330px; border:0; border-radius:0; padding:14px; resize:none; line-height:1.75; font:13px/1.75 ui-monospace,SFMono-Regular,Menlo,monospace; background:#fbfcfe; }
+    .component-editor-card textarea:focus { box-shadow:inset 0 0 0 2px #cbd7f4; }
+    .component-help { padding:11px 14px 14px; border-top:1px solid #edf0f4; color:#7c8797; font-size:.76rem; line-height:1.7; background:#fff; }
+    .component-help code { padding:2px 5px; border-radius:4px; background:#f0f3f8; color:#52638a; }
+    .component-preview-card { background:#f6f8fb; }
+    .component-preview-stage { min-height:430px; height:100%; padding:14px; overflow:auto; }
+    .component-preview-stage:before { content:'实时预览'; display:block; margin:0 0 10px 2px; color:#8a96a7; font-size:.75rem; letter-spacing:.04em; }
+    .component-preview-stage .blog-component { min-height:390px; border:1px solid #dce3ef; border-radius:10px; overflow:hidden; background:#fff; box-shadow:0 5px 18px rgba(39,55,82,.06); }
+    .component-preview-stage .component-badge, .component-preview-stage .component-placeholder { display:none; }
+    .component-preview-stage .admin-preview-map { height:390px; }
+    .component-preview-stage .blog-flow { overflow:auto; }
+    .component-preview-stage .admin-preview-flow { min-height:390px; }
+    .component-empty { display:flex; align-items:center; justify-content:center; min-height:390px; color:#a0aaba; font-size:.85rem; border:1px dashed #ccd5e2; border-radius:10px; background:#fbfcfe; }
+    .component-toolbar { display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 12px; }
+    .component-toolbar button { border:1px solid #d9e0ea; background:#fff; color:#65738a; border-radius:5px; padding:4px 8px; font-size:.75rem; cursor:pointer; }
+    .component-toolbar button:hover { border-color:#9daed5; color:#526da8; background:#f4f7ff; }
+    @media (max-width:900px) { .component-workspace { grid-template-columns:1fr; } .component-preview-stage { min-height:300px; } }
     .flow-edit-row { display:grid; grid-template-columns:1fr 1fr auto; gap:7px; margin-bottom:8px; }
     .flow-edit-row input { min-width:0; padding:8px 10px; border:1px solid #ddd; border-radius:6px; }
     .blog-component { border:2px dashed #91a8eb; border-radius:10px; padding:15px; margin:14px 0; background:#f5f7ff; }
@@ -264,14 +287,23 @@
   <div class="editor-panel component-panel">
     <div class="editor-header"><h2 id="componentTitle">插入脑图</h2><button class="btn btn-outline btn-sm" onclick="closeComponentEditor()">关闭</button></div>
     <div class="editor-body">
-      <div id="mindmapComponentForm">
-        <div class="form-group"><label>脑图内容</label><textarea id="mindmapSource" rows="12" placeholder="# 中心主题
+      <div class="component-workspace">
+        <div class="component-editor-card">
+          <div class="component-card-head"><strong>编辑结构</strong><span>Markdown 层级</span></div>
+          <div id="mindmapComponentForm">
+            <div class="form-group"><label>脑图内容</label><textarea id="mindmapSource" rows="12" oninput="updateComponentPreview()" placeholder="# 中心主题
 ## 第一分支
 ### 细节
-## 第二分支"></textarea><div class="editor-tip">每行一个节点，用 # 的层级表示关系。</div></div>
-      </div>
-      <div id="flowComponentForm" style="display:none">
-        <div class="form-group"><label>流程节点</label><div id="flowRows"></div><button type="button" class="btn btn-outline btn-sm" onclick="addFlowRow()">+ 添加节点</button><div class="editor-tip">节点会按填写顺序连接，适合表达学习步骤、产品流程或 RAG。</div></div>
+## 第二分支"></textarea></div>
+            <div class="component-toolbar"><button type="button" onclick="insertMindmapLevel(1)">+ 一级节点</button><button type="button" onclick="insertMindmapLevel(2)">+ 二级节点</button><button type="button" onclick="insertMindmapLevel(3)">+ 三级节点</button></div>
+            <div class="component-help">每行一个节点，用 <code>#</code> 表示层级。<br>例如：<code># 主题</code> → <code>## 分支</code> → <code>### 细节</code></div>
+          </div>
+          <div id="flowComponentForm" style="display:none">
+            <div class="form-group"><label>流程节点</label><div id="flowRows"></div><button type="button" class="btn btn-outline btn-sm" onclick="addFlowRow()">+ 添加节点</button></div>
+            <div class="component-help">按填写顺序自动连接。每个节点只写一个动作，补充说明可放在第二行。</div>
+          </div>
+        </div>
+        <div class="component-preview-card"><div class="component-card-head"><strong>可视化预览</strong><span>输入后自动更新</span></div><div id="componentPreview" class="component-preview-stage"><div class="component-empty">开始输入，右侧会显示脑图</div></div></div>
       </div>
     </div>
     <div class="editor-footer"><button class="btn btn-outline" onclick="closeComponentEditor()">取消</button><button class="btn btn-primary" onclick="insertVisualComponent()">插入正文</button></div>
@@ -520,12 +552,38 @@ function openComponentEditor(type, existing) {
   document.getElementById('flowComponentForm').style.display = type === 'flow' ? 'block' : 'none';
   if (type === 'mindmap') document.getElementById('mindmapSource').value = existing ? decodeURIComponent(existing.getAttribute('data-source') || '') : '# 我的主题\n## 第一部分\n### 具体内容\n## 第二部分';
   else { document.getElementById('flowRows').innerHTML = ''; var values = []; if (existing) { try { values = JSON.parse(decodeURIComponent(existing.getAttribute('data-nodes') || '[]')); } catch (_) {} } (values.length ? values : [{title:'开始',detail:''},{title:'处理',detail:''},{title:'完成',detail:''}]).forEach(function(n) { addFlowRow(n.title, n.detail); }); }
+  updateComponentPreview();
 }
 function closeComponentEditor() { document.getElementById('componentOverlay').classList.remove('active'); }
+function insertMindmapLevel(level) {
+  const input = document.getElementById('mindmapSource');
+  const prefix = '#'.repeat(level) + ' ';
+  const start = input.selectionStart || input.value.length;
+  const before = input.value.slice(0, start), after = input.value.slice(start);
+  const needsNewline = before && !before.endsWith('\n');
+  input.value = before + (needsNewline ? '\n' : '') + prefix + '新节点' + after;
+  input.focus(); input.selectionStart = input.selectionEnd = start + (needsNewline ? 1 : 0) + prefix.length;
+  updateComponentPreview();
+}
 function addFlowRow(title, detail) {
   const row = document.createElement('div'); row.className = 'flow-edit-row';
-  row.innerHTML = '<input class="flow-title" placeholder="节点名称" value="' + escHtml(title || '') + '"><input class="flow-detail" placeholder="补充说明（可选）" value="' + escHtml(detail || '') + '"><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">删除</button>';
+  row.innerHTML = '<input class="flow-title" placeholder="节点名称" value="' + escHtml(title || '') + '" oninput="updateComponentPreview()"><input class="flow-detail" placeholder="补充说明（可选）" value="' + escHtml(detail || '') + '" oninput="updateComponentPreview()"><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove();updateComponentPreview()">删除</button>';
   document.getElementById('flowRows').appendChild(row);
+  updateComponentPreview();
+}
+function updateComponentPreview() {
+  const stage = document.getElementById('componentPreview'); if (!stage) return;
+  let html = '';
+  if (componentType === 'mindmap') {
+    const source = (document.getElementById('mindmapSource').value || '').trim();
+    if (!source) { stage.innerHTML = '<div class="component-empty">开始输入，右侧会显示脑图</div>'; return; }
+    html = '<div class="blog-component blog-mindmap" data-source="' + attrValue(source) + '"><div class="component-placeholder"></div></div>';
+  } else {
+    const nodes = Array.from(document.querySelectorAll('#flowRows .flow-edit-row')).map(function(row) { return { title: row.querySelector('.flow-title').value.trim(), detail: row.querySelector('.flow-detail').value.trim() }; }).filter(function(n) { return n.title; });
+    if (nodes.length < 1) { stage.innerHTML = '<div class="component-empty">添加节点，右侧会显示流程图</div>'; return; }
+    html = '<div class="blog-component blog-flow" data-nodes="' + attrValue(JSON.stringify(nodes)) + '"><div class="component-placeholder"></div></div>';
+  }
+  stage.innerHTML = html; renderPreviewComponents(stage);
 }
 function attrValue(value) { return encodeURIComponent(String(value || '')); }
 function editVisualComponent(host) { openComponentEditor(host.classList.contains('blog-flow') ? 'flow' : 'mindmap', host); }
