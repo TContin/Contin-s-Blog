@@ -189,6 +189,23 @@
     .admin-preview-flow .connection .main-path { stroke:#aab8cb; stroke-width:2px; }
     .admin-preview-flow .drawflow-node .input, .admin-preview-flow .drawflow-node .output { width:9px; height:9px; background:#94a7c0; border:2px solid #fff; }
     @media(max-width:900px) { #editorOverlay .writing-panel { width:100%; height:100dvh; border-radius:0; } #editorOverlay .editor-body { padding:12px; } #editorOverlay #editTitle { font-size:19px; } .workspace-hint { display:none; } #editorOverlay .editor-workspace { overflow:auto; grid-template-columns:1fr; min-height:0; } #editorOverlay .editor-pane, #editorOverlay .preview-pane { min-height:430px; } .settings-fields { grid-template-columns:1fr; } .article-settings summary span { display:none; } }
+
+    /* Strong separation between writing and reading surfaces. */
+    #editorOverlay .editor-pane { background:#eef1f5; border-color:#d9dee7; }
+    #editorOverlay .editor-pane .editor-toolbar { background:#eef1f5; border-bottom-color:#d9dee7; }
+    #editorOverlay .editor-pane .rich-editor { margin:12px; padding:24px 28px; border:1px solid #e0e4eb; border-radius:8px; background:#fff; box-shadow:0 2px 8px rgba(35,48,68,.04); font-size:14px; line-height:1.85; }
+    #editorOverlay .editor-pane .html-editor { margin:12px; border:1px solid #d8dee8; border-radius:8px; background:#1f2937; color:#d9e4f2; }
+    #editorOverlay .preview-pane { background:#f0f2f5; border-color:#d9dee7; }
+    #editorOverlay .preview-label { background:#f0f2f5; padding-left:22px; }
+    #editorOverlay .content-preview { margin:0; padding:38px 52px 60px; background:#fff; color:#3f4652; font-size:16px; line-height:2; }
+    #editorOverlay .content-preview > * { max-width:700px; margin-left:auto; margin-right:auto; }
+    #editorOverlay .content-preview > p:first-child { font-size:17px; color:#596273; }
+    #editorOverlay .content-preview h2 { font-size:25px; margin-top:38px; border-bottom:1px solid #edf0f3; padding-bottom:10px; }
+    #editorOverlay .content-preview h3 { font-size:19px; }
+    #editorOverlay .content-preview pre { font-size:13px; line-height:1.65; background:#f5f6f8; border:1px solid #e7eaf0; }
+    #editorOverlay .content-preview .blog-component { max-width:700px; }
+    #editorOverlay .content-preview .learning-loop, #editorOverlay .content-preview .roadmap-grid { max-width:700px; }
+    @media(max-width:900px) { #editorOverlay .content-preview { padding:24px 22px 45px; } #editorOverlay .content-preview > * { max-width:none; } }
   </style>
 </head>
 <body>
