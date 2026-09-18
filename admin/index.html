@@ -72,6 +72,17 @@
     .toast.show { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .loading { pointer-events: none; opacity: 0.6; }
+    .loading { pointer-events: none; opacity: 0.6; }
+    .editor-toolbar { display:flex; gap:6px; flex-wrap:wrap; padding:8px; border:1px solid #ddd; border-bottom:0; border-radius:8px 8px 0 0; background:#fafafa; }
+    .editor-toolbar button { border:1px solid #ddd; background:#fff; color:#555; border-radius:5px; padding:5px 10px; cursor:pointer; }
+    .editor-toolbar button:hover { background:#eef3ff; border-color:#9bb5f5; }
+    .rich-editor { min-height:300px; max-height:52vh; overflow-y:auto; border:1px solid #ddd; border-radius:0 0 8px 8px; padding:16px; line-height:1.8; outline:none; }
+    .rich-editor:focus { border-color:#7895e8; box-shadow:0 0 0 2px rgba(120,149,232,.12); }
+    .rich-editor:empty:before { content:attr(data-placeholder); color:#aaa; }
+    .rich-editor h2 { margin:16px 0 8px; }
+    .rich-editor blockquote { margin:12px 0; padding:8px 14px; border-left:3px solid #7895e8; background:#f5f7ff; color:#666; }
+    .rich-editor img { max-width:100%; height:auto; border-radius:8px; }
+    .editor-tip { color:#999; font-size:.78rem; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -163,11 +174,17 @@
         </div>
       </div>
       <div class="form-group">
-        <label>正文（HTML 格式）</label>
-        <textarea id="editContent" rows="12" placeholder="<p>文章正文...</p>
-<h2>小标题</h2>
-<p>段落内容</p>
-<pre><code>代码块</code></pre>"></textarea>
+        <label>正文</label>
+        <div class="editor-toolbar">
+          <button type="button" onclick="formatContent('bold')"><b>B</b></button>
+          <button type="button" onclick="formatContent('formatBlock','h2')">标题</button>
+          <button type="button" onclick="formatContent('insertUnorderedList')">列表</button>
+          <button type="button" onclick="formatContent('formatBlock','blockquote')">引用</button>
+          <button type="button" onclick="insertContentImage()">图片</button>
+        </div>
+        <div id="richContent" class="rich-editor" contenteditable="true" data-placeholder="在这里直接写正文……"></div>
+        <textarea id="editContent" style="display:none"></textarea>
+        <div class="editor-tip">直接输入文字即可编辑，选中文字后可加粗、设为标题或列表。</div>
       </div>
     </div>
     <div class="editor-footer">
@@ -323,6 +340,7 @@ function openEditor(id) {
     document.getElementById('editTags').value = (post.tags || []).join(', ');
     document.getElementById('editCover').value = post.cover;
     document.getElementById('editContent').value = post.content;
+    document.getElementById('richContent').innerHTML = post.content;
     document.getElementById('saveBtn').textContent = '保存';
   } else {
     document.getElementById('editorTitle').textContent = '新建文章';
@@ -334,12 +352,34 @@ function openEditor(id) {
     document.getElementById('editTags').value = '';
     document.getElementById('editCover').value = '';
     document.getElementById('editContent').value = '';
+    document.getElementById('richContent').innerHTML = '';
     document.getElementById('saveBtn').textContent = '发布';
   }
 }
 
 function closeEditor() {
   document.getElementById('editorOverlay').classList.remove('active');
+}
+
+function formatContent(command, value) {
+  document.getElementById('richContent').focus();
+  document.execCommand(command, false, value || null);
+}
+async function insertContentImage() {
+  const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/png,image/jpeg,image/gif,image/webp';
+  input.onchange = async function() {
+    const file = input.files[0]; if (!file || file.size > 5 * 1024 * 1024) { showToast('图片不能超过 5MB', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = async function() {
+      const res = await fetch(API + '/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:reader.result}) });
+      const data = await res.json();
+      if (!data.success) { showToast(data.message || '图片上传失败', 'error'); return; }
+      document.getElementById('richContent').focus();
+      document.execCommand('insertHTML', false, '<p><img src="' + data.url + '" alt="' + escHtml(file.name) + '" style="max-width:100%;border-radius:8px"></p>');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
 }
 
 async function savePost() {
@@ -351,7 +391,7 @@ async function savePost() {
     date: document.getElementById('editDate').value,
     tags: document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean),
     cover: document.getElementById('editCover').value,
-    content: document.getElementById('editContent').value
+    content: document.getElementById('richContent').innerHTML
   };
 
   if (!body.title) { showToast('请填写标题', 'error'); return; }
