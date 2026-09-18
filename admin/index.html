@@ -53,7 +53,7 @@
     .editor-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 100; }
     .editor-overlay.active { display: flex; align-items: center; justify-content: center; }
     .settings-panel { max-width: 620px; }
-    .editor-panel { background: #fff; width: 90%; max-width: 800px; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; }
+    .editor-panel { background: #fff; width: min(1500px, 96vw); max-width: none; max-height: 94vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; }
     .editor-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
     .editor-header h2 { font-size: 1.05rem; color: #555; }
     .editor-body { padding: 20px; overflow-y: auto; flex: 1; }
@@ -83,6 +83,23 @@
     .rich-editor blockquote { margin:12px 0; padding:8px 14px; border-left:3px solid #7895e8; background:#f5f7ff; color:#666; }
     .rich-editor img { max-width:100%; height:auto; border-radius:8px; }
     .editor-tip { color:#999; font-size:.78rem; margin-top:6px; }
+    .content-editor-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .content-editor-heading label { margin:0; }
+    .mode-switch { display:flex; gap:4px; padding:3px; border-radius:7px; background:#f0f1f4; }
+    .mode-switch button { border:0; border-radius:5px; padding:5px 12px; color:#777; background:transparent; cursor:pointer; }
+    .mode-switch button.active { color:#fff; background:#596fd1; }
+    .editor-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; min-height:470px; }
+    .editor-pane, .preview-pane { min-width:0; display:flex; flex-direction:column; }
+    .preview-pane { border:1px solid #ddd; border-radius:8px; overflow:hidden; background:#fff; }
+    .preview-label { padding:9px 12px; border-bottom:1px solid #eee; color:#789; font-size:.8rem; font-weight:600; background:#fafbff; }
+    .content-preview { padding:20px; overflow:auto; flex:1; line-height:1.8; }
+    .content-preview img { max-width:100%; height:auto; border-radius:8px; }
+    .content-preview h1,.content-preview h2,.content-preview h3 { line-height:1.35; }
+    .html-editor { display:none; flex:1; min-height:420px; resize:none; padding:16px; border:1px solid #ddd; border-radius:8px; font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; color:#334; background:#fbfcff; }
+    .html-editor:focus { outline:none; border-color:#7895e8; }
+    .editor-pane.html-mode .editor-toolbar, .editor-pane.html-mode .rich-editor { display:none; }
+    .editor-pane.html-mode .html-editor { display:block; }
+    @media (max-width:900px) { .editor-workspace { grid-template-columns:1fr; } .preview-pane { min-height:300px; } .editor-panel { width:96vw; } }
     .component-panel { max-width: 680px; }
     .flow-edit-row { display:grid; grid-template-columns:1fr 1fr auto; gap:7px; margin-bottom:8px; }
     .flow-edit-row input { min-width:0; padding:8px 10px; border:1px solid #ddd; border-radius:6px; }
@@ -198,20 +215,19 @@
           <input type="text" id="editCover" placeholder="https://images.unsplash.com/...">
         </div>
       </div>
-      <div class="form-group">
-        <label>正文</label>
-        <div class="editor-toolbar">
-          <button type="button" onclick="formatContent('bold')"><b>B</b></button>
-          <button type="button" onclick="formatContent('formatBlock','h2')">标题</button>
-          <button type="button" onclick="formatContent('insertUnorderedList')">列表</button>
-          <button type="button" onclick="formatContent('formatBlock','blockquote')">引用</button>
-          <button type="button" onclick="insertContentImage()">图片</button>
-          <button type="button" onclick="openComponentEditor('mindmap')">脑图</button>
-          <button type="button" onclick="openComponentEditor('flow')">流程图</button>
+      <div class="form-group content-editor-group">
+        <div class="content-editor-heading"><label>正文</label><div class="mode-switch"><button type="button" id="visualModeBtn" class="active" onclick="setEditMode('visual')">可视化</button><button type="button" id="htmlModeBtn" onclick="setEditMode('html')">HTML</button></div></div>
+        <div class="editor-workspace">
+          <div class="editor-pane">
+            <div class="editor-toolbar">
+              <button type="button" onclick="formatContent('bold')"><b>B</b></button><button type="button" onclick="formatContent('formatBlock','h2')">标题</button><button type="button" onclick="formatContent('insertUnorderedList')">列表</button><button type="button" onclick="formatContent('formatBlock','blockquote')">引用</button><button type="button" onclick="insertContentImage()">图片</button><button type="button" onclick="openComponentEditor('mindmap')">脑图</button><button type="button" onclick="openComponentEditor('flow')">流程图</button>
+            </div>
+            <div id="richContent" class="rich-editor" contenteditable="true" data-placeholder="在这里直接写正文……"></div>
+            <textarea id="editContent" class="html-editor" spellcheck="false" placeholder="在这里编辑 HTML"></textarea>
+          </div>
+          <div class="preview-pane"><div class="preview-label">实时预览</div><div id="contentPreview" class="content-preview"></div></div>
         </div>
-        <div id="richContent" class="rich-editor" contenteditable="true" data-placeholder="在这里直接写正文……"></div>
-        <textarea id="editContent" style="display:none"></textarea>
-        <div class="editor-tip">直接输入文字即可编辑，选中文字后可加粗、设为标题或列表。</div>
+        <div class="editor-tip">左侧编辑，右侧实时预览；需要精细调整时切换到 HTML 模式。</div>
       </div>
     </div>
     <div class="editor-footer">
@@ -224,6 +240,7 @@
 <script>
 const API = '/admin/api';
 let posts = [];
+let editMode = 'visual';
 
 // ============================================
 // Toast
@@ -368,6 +385,7 @@ function openEditor(id) {
     document.getElementById('editCover').value = post.cover;
     document.getElementById('editContent').value = post.content;
     document.getElementById('richContent').innerHTML = post.content;
+    editMode = 'visual'; setEditMode('visual'); updateContentPreview();
     document.getElementById('saveBtn').textContent = '保存';
   } else {
     document.getElementById('editorTitle').textContent = '新建文章';
@@ -380,6 +398,7 @@ function openEditor(id) {
     document.getElementById('editCover').value = '';
     document.getElementById('editContent').value = '';
     document.getElementById('richContent').innerHTML = '';
+    editMode = 'visual'; setEditMode('visual'); updateContentPreview();
     document.getElementById('saveBtn').textContent = '发布';
   }
 }
@@ -429,6 +448,9 @@ function insertVisualComponent() {
   closeComponentEditor();
 }
 
+function updateContentPreview() { const html = editMode === 'html' ? document.getElementById('editContent').value : document.getElementById('richContent').innerHTML; document.getElementById('contentPreview').innerHTML = html || '<div class="empty-state">预览会显示在这里</div>'; }
+function setEditMode(mode) { if (mode === 'html') document.getElementById('editContent').value = document.getElementById('richContent').innerHTML; else document.getElementById('richContent').innerHTML = document.getElementById('editContent').value; editMode = mode; document.querySelector('.editor-pane').classList.toggle('html-mode', mode === 'html'); document.getElementById('visualModeBtn').classList.toggle('active', mode === 'visual'); document.getElementById('htmlModeBtn').classList.toggle('active', mode === 'html'); updateContentPreview(); }
+
 function formatContent(command, value) {
   document.getElementById('richContent').focus();
   document.execCommand(command, false, value || null);
@@ -459,7 +481,7 @@ async function savePost() {
     date: document.getElementById('editDate').value,
     tags: document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean),
     cover: document.getElementById('editCover').value,
-    content: document.getElementById('richContent').innerHTML
+    content: editMode === 'html' ? document.getElementById('editContent').value : document.getElementById('richContent').innerHTML
   };
 
   if (!body.title) { showToast('请填写标题', 'error'); return; }
@@ -507,6 +529,9 @@ async function deletePost(id) {
     showToast('网络错误', 'error');
   }
 }
+
+document.getElementById('richContent').addEventListener('input', updateContentPreview);
+document.getElementById('editContent').addEventListener('input', updateContentPreview);
 
 // Enable double-click editing for visual components.
 document.getElementById('richContent').addEventListener('dblclick', function(event) {
