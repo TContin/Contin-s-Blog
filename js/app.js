@@ -300,7 +300,20 @@ function renderArticle() {
   if (hero) hero.innerHTML = '<img src="' + post.cover + '" alt="' + post.title + '">';
   if (title) title.textContent = post.title;
   if (meta) meta.innerHTML = '<div class="post-meta-left"><span><i class="far fa-calendar-alt"></i> ' + post.date + '</span><span><i class="far fa-folder"></i> ' + post.category + '</span></div>';
-  if (text) text.innerHTML = post.content;
+  if (text) {
+    text.innerHTML = post.content;
+    var diagrams = text.querySelectorAll('pre code.language-mermaid');
+    diagrams.forEach(function(code) {
+      var diagram = document.createElement('div');
+      diagram.className = 'mermaid article-diagram';
+      diagram.textContent = code.textContent;
+      code.parentElement.replaceWith(diagram);
+    });
+    if (diagrams.length && window.mermaid) {
+      window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default' });
+      window.mermaid.run({ nodes: Array.from(text.querySelectorAll('.mermaid')) });
+    }
+  }
   if (tags) tags.innerHTML = post.tags.map(function(t) { return '<span class="article-tag"># ' + t + '</span>'; }).join('');
 
   if (nav) {
