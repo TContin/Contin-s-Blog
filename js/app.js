@@ -412,7 +412,9 @@ function renderInteractiveNotes(container) {
     if (host.__ready || !window.markmap || !window.markmap.Transformer || !window.markmap.Markmap) return;
     host.__ready = true;
     var source = decodeURIComponent(host.getAttribute('data-source') || '');
-    var canvas = document.createElement('div'); canvas.className = 'markmap component-markmap';
+    var canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); canvas.classList.add('markmap', 'component-markmap');
+    canvas.setAttribute('width', String(Math.max(520, host.clientWidth || 760)));
+    canvas.setAttribute('height', '420');
     host.innerHTML = ''; host.appendChild(canvas);
     var transformed = new window.markmap.Transformer().transform(source);
     window.markmap.Markmap.create(canvas, { autoFit: true, duration: 300 }, transformed.root);
