@@ -332,6 +332,7 @@ function renderArticle() {
       window.mermaid.run({ nodes: Array.from(text.querySelectorAll('.mermaid')) });
     }
     renderInteractiveNotes(text);
+    enhanceArticleCode(text);
   }
   if (tags) tags.innerHTML = post.tags.map(function(t) { return '<span class="article-tag"># ' + t + '</span>'; }).join('');
 
@@ -343,6 +344,37 @@ function renderArticle() {
     if (idx < posts.length - 1) h += '<a href="post.html?id=' + posts[idx+1].id + '">' + posts[idx+1].title + ' <i class="fas fa-arrow-right"></i></a>';
     nav.innerHTML = h;
   }
+}
+
+function enhanceArticleCode(container) {
+  var blocks = Array.from(container.querySelectorAll('pre'));
+  container.querySelectorAll('div[style]').forEach(function(el) {
+    if (el.style.whiteSpace === 'pre' && /monospace/i.test(el.style.fontFamily) && !el.closest('pre')) blocks.push(el);
+  });
+  blocks.forEach(function(block) {
+    if (block.closest('.code-panel')) return;
+    var panel = document.createElement('section'); panel.className = 'code-panel';
+    var toolbar = document.createElement('div'); toolbar.className = 'code-toolbar';
+    var label = document.createElement('span');
+    var code = block.querySelector('code');
+    var language = code && code.className.match(/language-([\w-]+)/);
+    label.textContent = language ? language[1].toUpperCase() : 'CODE';
+    var actions = document.createElement('div');
+    var expand = document.createElement('button'); expand.type = 'button'; expand.textContent = '展开代码'; expand.setAttribute('aria-expanded', 'false');
+    expand.onclick = function() {
+      var open = panel.classList.toggle('is-expanded');
+      expand.textContent = open ? '收起代码' : '展开代码'; expand.setAttribute('aria-expanded', String(open));
+    };
+    var copy = document.createElement('button'); copy.type = 'button'; copy.textContent = '复制';
+    copy.onclick = async function() {
+      try { await navigator.clipboard.writeText(block.innerText.replace(/\u00a0/g, ' ')); copy.textContent = '已复制'; }
+      catch (_) { copy.textContent = '复制失败，请手动选择'; }
+      setTimeout(function() { copy.textContent = '复制'; }, 2000);
+    };
+    actions.append(expand, copy); toolbar.append(label, actions);
+    block.before(panel); panel.append(toolbar, block); block.classList.add('code-body'); block.tabIndex = 0;
+    requestAnimationFrame(function() { expand.hidden = block.scrollHeight <= block.clientHeight + 2; });
+  });
 }
 
 function renderInteractiveNotes(container) {

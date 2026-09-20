@@ -1070,3 +1070,28 @@ ul {
 .rag-node-card span { filter: grayscale(.25); font-size: 1.15rem; }
 .rag-node-card b { font-size: .9rem; font-weight: 650; }
 .rag-node-card small { color: #8791a5; font-size: .7rem; }
+
+/* Comfortable article reading and pasted source-code presentation. */
+.article-container { max-width:1120px; padding:0 28px; }
+.article-content { padding:48px 64px; }
+.article-text { font-size:17px; line-height:1.95; overflow-wrap:anywhere; }
+.article-content h1 { font-size:32px; letter-spacing:-.025em; }
+.article-text h2 { font-size:25px; margin-top:40px; }
+.article-text > img { display:block; width:auto; max-width:100%; height:auto; margin:28px auto; }
+.code-panel { margin:28px 0; border:1px solid #303b50; border-radius:12px; overflow:hidden; background:#1e1e2e; box-shadow:0 8px 24px rgba(15,23,42,.08); }
+.code-toolbar { display:flex; justify-content:space-between; align-items:center; padding:10px 18px; background:#252b3b; border-bottom:1px solid #374052; color:#c3cee0; font:12px/1.5 system-ui,sans-serif; letter-spacing:.06em; }
+.code-toolbar > div { display:flex; gap:8px; }
+.code-toolbar button { font:12px/1.5 system-ui,sans-serif; color:#e0e7f1; border:1px solid #48536b; border-radius:6px; padding:5px 10px; background:transparent; cursor:pointer; }
+.code-toolbar button:hover { background:#39435a; }
+.code-toolbar button:focus-visible { outline:2px solid #a4bfff; outline-offset:2px; }
+.article-text .code-body { display:block; margin:0!important; padding:24px!important; border:0; border-radius:0; max-height:520px; overflow:auto; white-space:pre!important; overflow-wrap:normal; font:14px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace!important; tab-size:4; scrollbar-color:#526079 #1e1e2e; }
+.article-text .code-body code { font:inherit; }
+.code-panel.is-expanded .code-body { max-height:none; }
+@media(max-width:768px) {
+  .article-container { margin-top:72px; padding:0 12px; }
+  .article-content { padding:26px 20px; }
+  .article-content h1 { font-size:26px; }
+  .article-text { font-size:16px; }
+  .article-text .code-body { padding:18px!important; font-size:13px!important; max-height:420px; }
+  .code-toolbar { padding:10px 12px; }
+}
